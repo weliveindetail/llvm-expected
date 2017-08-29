@@ -22,11 +22,12 @@
 #include "llvm/Support/Signals.h"
 #include "llvm/Support/Threading.h"
 #include "llvm/Support/WindowsError.h"
-#include "llvm/Support/raw_ostream.h"
 #include <cassert>
 #include <cstdlib>
 #include <mutex>
 #include <new>
+#include <iostream>
+#include <sstream>
 
 #if defined(HAVE_UNISTD_H)
 # include <unistd.h>
@@ -101,11 +102,11 @@ void llvm::report_fatal_error(std::string Reason, bool GenCrashDiag) {
     // Blast the result out to stderr.  We don't try hard to make sure this
     // succeeds (e.g. handling EINTR) and we can't use errs() here because
     // raw ostreams can call report_fatal_error.
-    SmallVector<char, 64> Buffer;
-    raw_svector_ostream OS(Buffer);
+    char Buffer[64];
+    std::ostringstream OS(Buffer);
     OS << "LLVM ERROR: " << Reason << "\n";
-    StringRef MessageStr = OS.str();
-    ssize_t written = ::write(2, MessageStr.data(), MessageStr.size());
+    std::string MessageStr = OS.str();
+    ssize_t written = ::write(2, MessageStr.c_str(), MessageStr.size());
     (void)written; // If something went wrong, we deliberately just give up.
   }
 
@@ -172,11 +173,11 @@ void llvm::llvm_unreachable_internal(const char *msg, const char *file,
   // llvm_unreachable is intended to be used to indicate "impossible"
   // situations, and not legitimate runtime errors.
   if (msg)
-    dbgs() << msg << "\n";
-  dbgs() << "UNREACHABLE executed";
+    std::cerr << msg << "\n";
+  std::cerr << "UNREACHABLE executed";
   if (file)
-    dbgs() << " at " << file << ":" << line;
-  dbgs() << "!\n";
+    std::cerr << " at " << file << ":" << line;
+  std::cerr << "!\n";
   abort();
 #ifdef LLVM_BUILTIN_UNREACHABLE
   // Windows systems and possibly others don't declare abort() to be noreturn,

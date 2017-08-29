@@ -34,7 +34,7 @@ public:
   ExtraPayloadError(std::unique_ptr<ExtraPayload> EP)
     : EP(std::move(EP)) {}
 
-  void log(llvm::raw_ostream &OS) const override {
+  void log(std::ostream &OS) const override {
     OS << "ExtraPayloadError\n";
   }
 

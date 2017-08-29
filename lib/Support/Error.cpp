@@ -53,7 +53,7 @@ char ErrorList::ID = 0;
 char ECError::ID = 0;
 char StringError::ID = 0;
 
-void logAllUnhandledErrors(Error E, raw_ostream &OS, std::string ErrorBanner) {
+void logAllUnhandledErrors(Error E, std::ostream &OS, std::string ErrorBanner) {
   if (!E)
     return;
   OS << ErrorBanner;
@@ -93,7 +93,7 @@ std::error_code errorToErrorCode(Error Err) {
 StringError::StringError(std::string Msg, std::error_code EC)
     : Msg(std::move(Msg)), EC(EC) {}
 
-void StringError::log(raw_ostream &OS) const { OS << Msg; }
+void StringError::log(std::ostream &OS) const { OS << Msg; }
 
 std::error_code StringError::convertToErrorCode() const {
   return EC;
@@ -103,7 +103,7 @@ void report_fatal_error(Error Err, bool GenCrashDiag) {
   assert(Err && "report_fatal_error called with success value");
   std::string ErrMsg;
   {
-    raw_string_ostream ErrStream(ErrMsg);
+    std::ostringstream ErrStream(ErrMsg);
     logAllUnhandledErrors(std::move(Err), ErrStream, "");
   }
   report_fatal_error(ErrMsg);

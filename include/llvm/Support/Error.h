@@ -22,14 +22,15 @@
 #include "llvm/Support/Debug.h"
 #include "llvm/Support/ErrorHandling.h"
 #include "llvm/Support/ErrorOr.h"
-#include "llvm/Support/raw_ostream.h"
 #include <algorithm>
 #include <cassert>
 #include <cstdint>
 #include <cstdlib>
 #include <functional>
+#include <iostream>
 #include <memory>
 #include <new>
+#include <sstream>
 #include <string>
 #include <system_error>
 #include <type_traits>
@@ -47,12 +48,12 @@ public:
   virtual ~ErrorInfoBase() = default;
 
   /// Print an error message to an output stream.
-  virtual void log(raw_ostream &OS) const = 0;
+  virtual void log(std::ostream &OS) const = 0;
 
   /// Return the error message as a string.
   virtual std::string message() const {
     std::string Msg;
-    raw_string_ostream OS(Msg);
+    std::ostringstream OS(Msg);
     log(OS);
     return OS.str();
   }
@@ -247,13 +248,13 @@ private:
   void assertIsChecked() {
 #if LLVM_ENABLE_ABI_BREAKING_CHECKS
     if (!getChecked() || getPtr()) {
-      dbgs() << "Program aborted due to an unhandled Error:\n";
+      std::cerr << "Program aborted due to an unhandled Error:\n";
       if (getPtr())
-        getPtr()->log(dbgs());
+        getPtr()->log(std::cerr);
       else
-        dbgs()
-            << "Error value was Success. (Note: Success values must still be "
-               "checked prior to being destroyed).\n";
+        std::cerr << "Error value was Success. "
+                     "Note: Success values must still be "
+                     "checked prior to being destroyed.\n";
       abort();
     }
 #endif
@@ -347,7 +348,7 @@ class ErrorList final : public ErrorInfo<ErrorList> {
   friend Error joinErrors(Error, Error);
 
 public:
-  void log(raw_ostream &OS) const override {
+  void log(std::ostream &OS) const override {
     OS << "Multiple errors:\n";
     for (auto &ErrPayload : Payloads) {
       ErrPayload->log(OS);
@@ -569,7 +570,7 @@ inline void handleAllErrors(Error E) {
 /// This is useful in the base level of your program to allow clean termination
 /// (allowing clean deallocation of resources, etc.), while reporting error
 /// information to the user.
-void logAllUnhandledErrors(Error E, raw_ostream &OS, std::string ErrorBanner);
+void logAllUnhandledErrors(Error E, std::ostream &OS, std::string ErrorBanner);
 
 /// Write all error messages (if any) in E to a string. The newline character
 /// is used to separate error messages.
@@ -862,14 +863,14 @@ private:
   void assertIsChecked() {
 #if LLVM_ENABLE_ABI_BREAKING_CHECKS
     if (Unchecked) {
-      dbgs() << "Expected<T> must be checked before access or destruction.\n";
+      std::cerr << "Expected<T> must be checked before access or destruction.\n";
       if (HasError) {
-        dbgs() << "Unchecked Expected<T> contained error:\n";
-        (*getErrorStorage())->log(dbgs());
+        std::cerr << "Unchecked Expected<T> contained error:\n";
+        (*getErrorStorage())->log(std::cerr);
       } else
-        dbgs() << "Expected<T> value was in success state. (Note: Expected<T> "
-                  "values in success mode must still be checked prior to being "
-                  "destroyed).\n";
+        std::cerr << "Expected<T> value was in success state. (Note: Expected<T> "
+                     "values in success mode must still be checked prior to being "
+                     "destroyed).\n";
       abort();
     }
 #endif
@@ -917,7 +918,7 @@ class ECError : public ErrorInfo<ECError> {
 public:
   void setErrorCode(std::error_code EC) { this->EC = EC; }
   std::error_code convertToErrorCode() const override { return EC; }
-  void log(raw_ostream &OS) const override { OS << EC.message(); }
+  void log(std::ostream &OS) const override { OS << EC.message(); }
 
   // Used by ErrorInfo::classID.
   static char ID;
@@ -971,7 +972,7 @@ public:
 
   StringError(std::string Msg, std::error_code EC);
 
-  void log(raw_ostream &OS) const override;
+  void log(std::ostream &OS) const override;
   std::error_code convertToErrorCode() const override;
 
   const std::string &getMessage() const { return Msg; }
@@ -1021,7 +1022,7 @@ private:
   void checkError(Error Err) const {
     if (Err) {
       int ExitCode = GetExitCode(Err);
-      logAllUnhandledErrors(std::move(Err), errs(), Banner);
+      logAllUnhandledErrors(std::move(Err), std::cerr, Banner);
       exit(ExitCode);
     }
   }
