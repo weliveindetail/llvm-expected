@@ -77,7 +77,7 @@ std::error_code inconvertibleErrorCode() {
 Error errorCodeToError(std::error_code EC) {
   if (!EC)
     return Error::success();
-  return Error(llvm::make_unique<ECError>(ECError(EC)));
+  return Error(std::make_unique<ECError>(ECError(EC)));
 }
 
 std::error_code errorToErrorCode(Error Err) {
