@@ -15,7 +15,6 @@
 #include "llvm/Support/ErrorHandling.h"
 #include "llvm-c/ErrorHandling.h"
 #include "llvm/ADT/SmallVector.h"
-#include "llvm/ADT/Twine.h"
 #include "llvm/Config/config.h"
 #include "llvm/Support/Debug.h"
 #include "llvm/Support/Errc.h"
@@ -80,18 +79,10 @@ void llvm::remove_fatal_error_handler() {
 }
 
 void llvm::report_fatal_error(const char *Reason, bool GenCrashDiag) {
-  report_fatal_error(Twine(Reason), GenCrashDiag);
+  report_fatal_error(std::string(Reason), GenCrashDiag);
 }
 
-void llvm::report_fatal_error(const std::string &Reason, bool GenCrashDiag) {
-  report_fatal_error(Twine(Reason), GenCrashDiag);
-}
-
-void llvm::report_fatal_error(StringRef Reason, bool GenCrashDiag) {
-  report_fatal_error(Twine(Reason), GenCrashDiag);
-}
-
-void llvm::report_fatal_error(const Twine &Reason, bool GenCrashDiag) {
+void llvm::report_fatal_error(std::string Reason, bool GenCrashDiag) {
   llvm::fatal_error_handler_t handler = nullptr;
   void* handlerData = nullptr;
   {
@@ -105,7 +96,7 @@ void llvm::report_fatal_error(const Twine &Reason, bool GenCrashDiag) {
   }
 
   if (handler) {
-    handler(handlerData, Reason.str(), GenCrashDiag);
+    handler(handlerData, Reason, GenCrashDiag);
   } else {
     // Blast the result out to stderr.  We don't try hard to make sure this
     // succeeds (e.g. handling EINTR) and we can't use errs() here because

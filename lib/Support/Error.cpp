@@ -8,7 +8,6 @@
 //===----------------------------------------------------------------------===//
 
 #include "llvm/Support/Error.h"
-#include "llvm/ADT/Twine.h"
 #include "llvm/Support/ErrorHandling.h"
 #include "llvm/Support/ManagedStatic.h"
 #include <system_error>
@@ -54,7 +53,7 @@ char ErrorList::ID = 0;
 char ECError::ID = 0;
 char StringError::ID = 0;
 
-void logAllUnhandledErrors(Error E, raw_ostream &OS, Twine ErrorBanner) {
+void logAllUnhandledErrors(Error E, raw_ostream &OS, std::string ErrorBanner) {
   if (!E)
     return;
   OS << ErrorBanner;
@@ -91,8 +90,8 @@ std::error_code errorToErrorCode(Error Err) {
   return EC;
 }
 
-StringError::StringError(const Twine &S, std::error_code EC)
-    : Msg(S.str()), EC(EC) {}
+StringError::StringError(std::string Msg, std::error_code EC)
+    : Msg(std::move(Msg)), EC(EC) {}
 
 void StringError::log(raw_ostream &OS) const { OS << Msg; }
 

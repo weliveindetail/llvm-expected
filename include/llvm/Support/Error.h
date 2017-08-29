@@ -17,7 +17,6 @@
 #include "llvm/ADT/SmallVector.h"
 #include "llvm/ADT/STLExtras.h"
 #include "llvm/ADT/StringExtras.h"
-#include "llvm/ADT/Twine.h"
 #include "llvm/Config/abi-breaking.h"
 #include "llvm/Support/AlignOf.h"
 #include "llvm/Support/Compiler.h"
@@ -571,7 +570,7 @@ inline void handleAllErrors(Error E) {
 /// This is useful in the base level of your program to allow clean termination
 /// (allowing clean deallocation of resources, etc.), while reporting error
 /// information to the user.
-void logAllUnhandledErrors(Error E, raw_ostream &OS, Twine ErrorBanner);
+void logAllUnhandledErrors(Error E, raw_ostream &OS, std::string ErrorBanner);
 
 /// Write all error messages (if any) in E to a string. The newline character
 /// is used to separate error messages.
@@ -971,7 +970,7 @@ class StringError : public ErrorInfo<StringError> {
 public:
   static char ID;
 
-  StringError(const Twine &S, std::error_code EC);
+  StringError(std::string Msg, std::error_code EC);
 
   void log(raw_ostream &OS) const override;
   std::error_code convertToErrorCode() const override;
