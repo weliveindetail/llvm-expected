@@ -255,7 +255,7 @@ public:
 
 private:
   void assertIsChecked() {
-#if LLVM_ENABLE_ABI_BREAKING_CHECKS
+#if EXPECTED_ENABLE_ABI_BREAKING_CHECKS
     if (!getChecked() || getPtr()) {
       std::cerr << "Program aborted due to an unhandled Error:\n";
       if (getPtr())
@@ -276,7 +276,7 @@ private:
   }
 
   void setPtr(ErrorInfoBase *EI) {
-#if LLVM_ENABLE_ABI_BREAKING_CHECKS
+#if EXPECTED_ENABLE_ABI_BREAKING_CHECKS
     Payload = reinterpret_cast<ErrorInfoBase*>(
                 (reinterpret_cast<uintptr_t>(EI) &
                  ~static_cast<uintptr_t>(0x1)) |
@@ -287,7 +287,7 @@ private:
   }
 
   bool getChecked() const {
-#if LLVM_ENABLE_ABI_BREAKING_CHECKS
+#if EXPECTED_ENABLE_ABI_BREAKING_CHECKS
     return (reinterpret_cast<uintptr_t>(Payload) & 0x1) == 0;
 #else
     return true;
@@ -691,7 +691,7 @@ public:
   /// Create an Expected<T> error value from the given Error.
   Expected(Error Err)
       : HasError(true)
-#if LLVM_ENABLE_ABI_BREAKING_CHECKS
+#if EXPECTED_ENABLE_ABI_BREAKING_CHECKS
         // Expected is unchecked upon construction in Debug builds.
         , Unchecked(true)
 #endif
@@ -712,7 +712,7 @@ public:
            typename std::enable_if<std::is_convertible<OtherT, T>::value>::type
                * = nullptr)
       : HasError(false)
-#if LLVM_ENABLE_ABI_BREAKING_CHECKS
+#if EXPECTED_ENABLE_ABI_BREAKING_CHECKS
         // Expected is unchecked upon construction in Debug builds.
         , Unchecked(true)
 #endif
@@ -759,7 +759,7 @@ public:
 
   /// \brief Return false if there is an error.
   explicit operator bool() {
-#if LLVM_ENABLE_ABI_BREAKING_CHECKS
+#if EXPECTED_ENABLE_ABI_BREAKING_CHECKS
     Unchecked = HasError;
 #endif
     return !HasError;
@@ -787,7 +787,7 @@ public:
   /// only be safely destructed. No further calls (beside the destructor) should
   /// be made on the Expected<T> vaule.
   Error takeError() {
-#if LLVM_ENABLE_ABI_BREAKING_CHECKS
+#if EXPECTED_ENABLE_ABI_BREAKING_CHECKS
     Unchecked = false;
 #endif
     return HasError ? Error(std::move(*getErrorStorage())) : Error::success();
@@ -830,7 +830,7 @@ private:
 
   template <class OtherT> void moveConstruct(Expected<OtherT> &&Other) {
     HasError = Other.HasError;
-#if LLVM_ENABLE_ABI_BREAKING_CHECKS
+#if EXPECTED_ENABLE_ABI_BREAKING_CHECKS
     Unchecked = true;
     Other.Unchecked = false;
 #endif
@@ -881,13 +881,13 @@ private:
 
   // Used by ExpectedAsOutParameter to reset the checked flag.
   void setUnchecked() {
-#if LLVM_ENABLE_ABI_BREAKING_CHECKS
+#if EXPECTED_ENABLE_ABI_BREAKING_CHECKS
     Unchecked = true;
 #endif
   }
 
   void assertIsChecked() {
-#if LLVM_ENABLE_ABI_BREAKING_CHECKS
+#if EXPECTED_ENABLE_ABI_BREAKING_CHECKS
     if (Unchecked) {
       std::cerr << "Expected<T> must be checked before access or destruction.\n";
       if (HasError) {
@@ -907,7 +907,7 @@ private:
     AlignedCharArrayUnion<error_type> ErrorStorage;
   };
   bool HasError : 1;
-#if LLVM_ENABLE_ABI_BREAKING_CHECKS
+#if EXPECTED_ENABLE_ABI_BREAKING_CHECKS
   bool Unchecked : 1;
 #endif
 };

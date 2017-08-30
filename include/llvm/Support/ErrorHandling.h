@@ -168,7 +168,6 @@ expected_unreachable_internal(const char *msg = nullptr,
 #define expected_unreachable(msg) ::llvm::expected_unreachable_internal()
 #endif
 
-#undef EXPECTED_BUILTIN_UNREACHABLE
 #undef EXPECTED_GNUC_PREREQ
 
-#endif
+#endif // LLVM_SUPPORT_ERRORHANDLING_H

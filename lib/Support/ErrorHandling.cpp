@@ -27,7 +27,7 @@
 #include <iostream>
 #include <sstream>
 
-#if defined(HAVE_UNISTD_H)
+#if defined(EXPECTED_HAVE_UNISTD_H)
 # include <unistd.h>
 #endif
 
@@ -36,12 +36,18 @@
 # include <fcntl.h>
 #endif
 
-/// LLVM_EXTENSION - Support compilers where we have a keyword to suppress
+/// EXPECTED_EXTENSION - Support compilers where we have a keyword to suppress
 /// pedantic diagnostics.
 #ifdef __GNUC__
-#define LLVM_EXTENSION __extension__
+#define EXPECTED_EXTENSION __extension__
 #else
-#define LLVM_EXTENSION
+#define EXPECTED_EXTENSION
+#endif
+
+#if EXPECTED_ENABLE_THREADS == 1
+#define IF_THREADS(X) X
+#else
+#define IF_THREADS(X)
 #endif
 
 using namespace llvm;
@@ -52,7 +58,6 @@ static void *ErrorHandlerUserData = nullptr;
 static fatal_error_handler_t BadAllocErrorHandler = nullptr;
 static void *BadAllocErrorHandlerUserData = nullptr;
 
-#if LLVM_ENABLE_THREADS == 1
 // Mutexes to synchronize installing error handlers and calling error handlers.
 // Do not use ManagedStatic, or that may allocate memory while attempting to
 // report an OOM.
@@ -64,24 +69,19 @@ static void *BadAllocErrorHandlerUserData = nullptr;
 // STL and hide all of its symbols with 'opt -internalize'. To reduce size, it
 // cuts out the threading portions of the hermetic copy of libc++ that it
 // builds. We can remove these ifdefs if that script goes away.
-static std::mutex ErrorHandlerMutex;
-static std::mutex BadAllocErrorHandlerMutex;
-#endif
+IF_THREADS(static std::mutex ErrorHandlerMutex);
+IF_THREADS(static std::mutex BadAllocErrorHandlerMutex);
 
 void llvm::install_fatal_error_handler(fatal_error_handler_t handler,
                                        void *user_data) {
-#if LLVM_ENABLE_THREADS == 1
-  std::lock_guard<std::mutex> Lock(ErrorHandlerMutex);
-#endif
+  IF_THREADS(std::lock_guard<std::mutex> Lock(ErrorHandlerMutex));
   assert(!ErrorHandler && "Error handler already registered!\n");
   ErrorHandler = handler;
   ErrorHandlerUserData = user_data;
 }
 
 void llvm::remove_fatal_error_handler() {
-#if LLVM_ENABLE_THREADS == 1
-  std::lock_guard<std::mutex> Lock(ErrorHandlerMutex);
-#endif
+  IF_THREADS(std::lock_guard<std::mutex> Lock(ErrorHandlerMutex));
   ErrorHandler = nullptr;
   ErrorHandlerUserData = nullptr;
 }
@@ -96,9 +96,7 @@ void llvm::report_fatal_error(std::string Reason, bool GenCrashDiag) {
   {
     // Only acquire the mutex while reading the handler, so as not to invoke a
     // user-supplied callback under a lock.
-#if LLVM_ENABLE_THREADS == 1
-    std::lock_guard<std::mutex> Lock(ErrorHandlerMutex);
-#endif
+    IF_THREADS(std::lock_guard<std::mutex> Lock(ErrorHandlerMutex));
     handler = ErrorHandler;
     handlerData = ErrorHandlerUserData;
   }
@@ -127,18 +125,14 @@ void llvm::report_fatal_error(std::string Reason, bool GenCrashDiag) {
 
 void llvm::install_bad_alloc_error_handler(fatal_error_handler_t handler,
                                            void *user_data) {
-#if LLVM_ENABLE_THREADS == 1
-  std::lock_guard<std::mutex> Lock(BadAllocErrorHandlerMutex);
-#endif
+  IF_THREADS(std::lock_guard<std::mutex> Lock(BadAllocErrorHandlerMutex));
   assert(!ErrorHandler && "Bad alloc error handler already registered!\n");
   BadAllocErrorHandler = handler;
   BadAllocErrorHandlerUserData = user_data;
 }
 
 void llvm::remove_bad_alloc_error_handler() {
-#if LLVM_ENABLE_THREADS == 1
-  std::lock_guard<std::mutex> Lock(BadAllocErrorHandlerMutex);
-#endif
+  IF_THREADS(std::lock_guard<std::mutex> Lock(BadAllocErrorHandlerMutex));
   BadAllocErrorHandler = nullptr;
   BadAllocErrorHandlerUserData = nullptr;
 }
@@ -149,9 +143,7 @@ void llvm::report_bad_alloc_error(const char *Reason, bool GenCrashDiag) {
   {
     // Only acquire the mutex while reading the handler, so as not to invoke a
     // user-supplied callback under a lock.
-#if LLVM_ENABLE_THREADS == 1
-    std::lock_guard<std::mutex> Lock(BadAllocErrorHandlerMutex);
-#endif
+    IF_THREADS(std::lock_guard<std::mutex> Lock(BadAllocErrorHandlerMutex));
     Handler = BadAllocErrorHandler;
     HandlerData = BadAllocErrorHandlerUserData;
   }
@@ -161,7 +153,7 @@ void llvm::report_bad_alloc_error(const char *Reason, bool GenCrashDiag) {
     expected_unreachable("bad alloc handler should not return");
   }
 
-#ifdef LLVM_ENABLE_EXCEPTIONS
+#ifdef EXPECTED_ENABLE_EXCEPTIONS
   // If exceptions are enabled, make OOM in malloc look like OOM in new.
   throw std::bad_alloc();
 #else
@@ -196,13 +188,13 @@ void llvm::expected_unreachable_internal(const char *msg, const char *file,
 static void bindingsErrorHandler(void *user_data, const std::string& reason,
                                  bool gen_crash_diag) {
   LLVMFatalErrorHandler handler =
-      LLVM_EXTENSION reinterpret_cast<LLVMFatalErrorHandler>(user_data);
+      EXPECTED_EXTENSION reinterpret_cast<LLVMFatalErrorHandler>(user_data);
   handler(reason.c_str());
 }
 
 void LLVMInstallFatalErrorHandler(LLVMFatalErrorHandler Handler) {
   install_fatal_error_handler(bindingsErrorHandler,
-                              LLVM_EXTENSION reinterpret_cast<void *>(Handler));
+                              EXPECTED_EXTENSION reinterpret_cast<void *>(Handler));
 }
 
 void LLVMResetFatalErrorHandler() {
