@@ -13,7 +13,6 @@
 //===----------------------------------------------------------------------===//
 
 #include "llvm/Support/ErrorHandling.h"
-#include "llvm-c/ErrorHandling.h"
 #include "llvm/Config/config.h"
 #include "llvm/Support/Debug.h"
 #include "llvm/Support/Errc.h"
@@ -55,9 +54,6 @@ using namespace llvm;
 static fatal_error_handler_t ErrorHandler = nullptr;
 static void *ErrorHandlerUserData = nullptr;
 
-static fatal_error_handler_t BadAllocErrorHandler = nullptr;
-static void *BadAllocErrorHandlerUserData = nullptr;
-
 // Mutexes to synchronize installing error handlers and calling error handlers.
 // Do not use ManagedStatic, or that may allocate memory while attempting to
 // report an OOM.
@@ -70,7 +66,6 @@ static void *BadAllocErrorHandlerUserData = nullptr;
 // cuts out the threading portions of the hermetic copy of libc++ that it
 // builds. We can remove these ifdefs if that script goes away.
 IF_THREADS(static std::mutex ErrorHandlerMutex);
-IF_THREADS(static std::mutex BadAllocErrorHandlerMutex);
 
 void llvm::install_fatal_error_handler(fatal_error_handler_t handler,
                                        void *user_data) {
@@ -123,49 +118,6 @@ void llvm::report_fatal_error(std::string Reason, bool GenCrashDiag) {
   exit(1);
 }
 
-void llvm::install_bad_alloc_error_handler(fatal_error_handler_t handler,
-                                           void *user_data) {
-  IF_THREADS(std::lock_guard<std::mutex> Lock(BadAllocErrorHandlerMutex));
-  assert(!ErrorHandler && "Bad alloc error handler already registered!\n");
-  BadAllocErrorHandler = handler;
-  BadAllocErrorHandlerUserData = user_data;
-}
-
-void llvm::remove_bad_alloc_error_handler() {
-  IF_THREADS(std::lock_guard<std::mutex> Lock(BadAllocErrorHandlerMutex));
-  BadAllocErrorHandler = nullptr;
-  BadAllocErrorHandlerUserData = nullptr;
-}
-
-void llvm::report_bad_alloc_error(const char *Reason, bool GenCrashDiag) {
-  fatal_error_handler_t Handler = nullptr;
-  void *HandlerData = nullptr;
-  {
-    // Only acquire the mutex while reading the handler, so as not to invoke a
-    // user-supplied callback under a lock.
-    IF_THREADS(std::lock_guard<std::mutex> Lock(BadAllocErrorHandlerMutex));
-    Handler = BadAllocErrorHandler;
-    HandlerData = BadAllocErrorHandlerUserData;
-  }
-
-  if (Handler) {
-    Handler(HandlerData, Reason, GenCrashDiag);
-    expected_unreachable("bad alloc handler should not return");
-  }
-
-#ifdef EXPECTED_ENABLE_EXCEPTIONS
-  // If exceptions are enabled, make OOM in malloc look like OOM in new.
-  throw std::bad_alloc();
-#else
-  // Don't call the normal error handler. It may allocate memory. Directly write
-  // an OOM to stderr and abort.
-  char OOMMessage[] = "LLVM ERROR: out of memory\n";
-  ssize_t written = ::write(2, OOMMessage, strlen(OOMMessage));
-  (void)written;
-  abort();
-#endif
-}
-
 void llvm::expected_unreachable_internal(const char *msg, const char *file,
                                          unsigned line) {
   // This code intentionally doesn't call the ErrorHandler callback, because
@@ -183,22 +135,6 @@ void llvm::expected_unreachable_internal(const char *msg, const char *file,
   // so use the unreachable builtin to avoid a Clang self-host warning.
   EXPECTED_BUILTIN_UNREACHABLE;
 #endif
-}
-
-static void bindingsErrorHandler(void *user_data, const std::string& reason,
-                                 bool gen_crash_diag) {
-  LLVMFatalErrorHandler handler =
-      EXPECTED_EXTENSION reinterpret_cast<LLVMFatalErrorHandler>(user_data);
-  handler(reason.c_str());
-}
-
-void LLVMInstallFatalErrorHandler(LLVMFatalErrorHandler Handler) {
-  install_fatal_error_handler(bindingsErrorHandler,
-                              EXPECTED_EXTENSION reinterpret_cast<void *>(Handler));
-}
-
-void LLVMResetFatalErrorHandler() {
-  remove_fatal_error_handler();
 }
 
 #ifdef _WIN32
