@@ -19,13 +19,12 @@
 #include <sstream>
 #include <system_error>
 
-#if defined(EXPECTED_HAVE_UNISTD_H)
-#include <unistd.h>
-#endif
-
-#if defined(_MSC_VER)
+#ifdef _MSC_VER
 #include <fcntl.h>
 #include <io.h>
+typedef int ssize_t;
+#else
+#include <unistd.h>
 #endif
 
 /// EXPECTED_EXTENSION - Support compilers where we have a keyword to suppress
@@ -218,7 +217,7 @@ void report_fatal_error(Error Err, bool GenCrashDiag) {
 // I'd rather not double the line count of the following.
 #define MAP_ERR_TO_COND(x, y)                                                  \
   case x:                                                                      \
-    return make_error_code(errc::y)
+    return std::make_error_code(std::errc::y)
 
 /// Useful helper for Windows system errors:
 ///

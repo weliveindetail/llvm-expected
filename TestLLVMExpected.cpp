@@ -164,8 +164,11 @@ int main(int argc, char **argv) {
   );
 
   ::testing::InitGoogleTest(&argc, argv);
-  ::testing::GTEST_FLAG(catch_exceptions) = false;
-  ::testing::GTEST_FLAG(throw_on_failure) = true;
+
+  #ifndef _WIN32
+    ::testing::GTEST_FLAG(catch_exceptions) = false;
+    ::testing::GTEST_FLAG(throw_on_failure) = true;
+  #endif
 
   int exitCode = RUN_ALL_TESTS();
 

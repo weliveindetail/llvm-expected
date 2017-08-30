@@ -31,7 +31,9 @@
 #include <vector>
 
 /* Define to 1 if you have the <unistd.h> header file. */
+#ifndef _WIN32
 #define EXPECTED_HAVE_UNISTD_H 1
+#endif
 
 /* Define if threads enabled */
 #define EXPECTED_ENABLE_THREADS 1
