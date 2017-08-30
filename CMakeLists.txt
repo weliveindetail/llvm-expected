@@ -22,6 +22,8 @@ add_executable(TestLLVMExpected
     ExtraPayloadError.h
     ExtraPayloadError.cpp
 
+    include/llvm/Config/config.h
+
     include/llvm/Support/AlignOf.h
     include/llvm/Support/Compiler.h
     include/llvm/Support/Error.h

@@ -19,7 +19,6 @@
 #include "llvm/Support/Errc.h"
 #include "llvm/Support/Error.h"
 #include "llvm/Support/Signals.h"
-#include "llvm/Support/Threading.h"
 #include "llvm/Support/WindowsError.h"
 #include <cassert>
 #include <cstdlib>
@@ -31,9 +30,18 @@
 #if defined(HAVE_UNISTD_H)
 # include <unistd.h>
 #endif
+
 #if defined(_MSC_VER)
 # include <io.h>
 # include <fcntl.h>
+#endif
+
+/// LLVM_EXTENSION - Support compilers where we have a keyword to suppress
+/// pedantic diagnostics.
+#ifdef __GNUC__
+#define LLVM_EXTENSION __extension__
+#else
+#define LLVM_EXTENSION
 #endif
 
 using namespace llvm;
@@ -201,7 +209,7 @@ void LLVMResetFatalErrorHandler() {
   remove_fatal_error_handler();
 }
 
-#ifdef LLVM_ON_WIN32
+#ifdef _WIN32
 
 #include <winerror.h>
 
