@@ -3,8 +3,8 @@
 
 #include <gtest/gtest.h>
 
-#include "llvm/Support/Expected.h"
-#include "llvm/Support/Errors.h"
+#include "Expected.h"
+#include "Errors.h"
 
 class ExtraPayload {
   bool Checked = false;

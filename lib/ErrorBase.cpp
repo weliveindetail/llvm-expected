@@ -1,4 +1,4 @@
-//===----- lib/Support/Error.cpp - Error and associated utilities ---------===//
+//===- llvm-expected/lib/ErrorBase.cpp - Recoverable error handling -------===//
 //
 //                     The LLVM Compiler Infrastructure
 //
@@ -7,9 +7,9 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/ErrorBase.h"
-#include "llvm/Support/Errors.h"
-#include "llvm/Support/Expected.h"
+#include "ErrorBase.h"
+#include "Errors.h"
+#include "Expected.h"
 
 #include <cassert>
 #include <cstdlib>

@@ -1,4 +1,4 @@
-//===- llvm/Support/ErrorHandling.h - Fatal error handling ------*- C++ -*-===//
+//===- llvm-expected/lib/ErrorBase.h - Recoverable error handling ---------===//
 //
 //                     The LLVM Compiler Infrastructure
 //

@@ -1,4 +1,4 @@
-//===- llvm/Support/Errors.h - Recoverable error handling -------*- C++ -*-===//
+//===- llvm-expected/include/Errors.h - Predefined Error Types and Utils --===//
 //
 //                     The LLVM Compiler Infrastructure
 //
