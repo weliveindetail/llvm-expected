@@ -3,7 +3,7 @@
 
 #include <gtest/gtest.h>
 
-#include "llvm/Support/Error.h"
+#include "llvm/Support/Expected.h"
 
 #include "ExtraPayloadError.h"
 

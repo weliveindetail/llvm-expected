@@ -22,11 +22,11 @@ add_executable(TestLLVMExpected
     ExtraPayloadError.h
     ExtraPayloadError.cpp
 
-    include/llvm/Support/Error.h
-    include/llvm/Support/ErrorHandling.h
-    include/llvm/Support/Error.h
+    include/llvm/Support/Expected.h
+    include/llvm/Support/Errors.h
+    include/llvm/Support/ErrorBase.h
 
-    lib/Support/Error.cpp
+    lib/Support/ErrorBase.cpp
 )
 
 set_target_properties(TestLLVMExpected PROPERTIES

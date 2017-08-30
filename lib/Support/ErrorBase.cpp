@@ -7,9 +7,9 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/Error.h"
-#include "llvm/Support/ErrorHandling.h"
+#include "llvm/Support/ErrorBase.h"
 #include "llvm/Support/Errors.h"
+#include "llvm/Support/Expected.h"
 
 #include <cassert>
 #include <cstdlib>

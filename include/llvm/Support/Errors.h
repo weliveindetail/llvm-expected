@@ -19,7 +19,7 @@
 #include <type_traits>
 #include <vector>
 
-#include "ErrorHandling.h"
+#include "ErrorBase.h"
 
 namespace llvm {
 

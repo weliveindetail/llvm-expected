@@ -17,7 +17,7 @@
 #include <memory>
 #include <type_traits>
 
-#include "ErrorHandling.h"
+#include "ErrorBase.h"
 
 namespace llvm {
 
