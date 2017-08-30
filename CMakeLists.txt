@@ -42,40 +42,16 @@ set_target_properties(TestLLVMExpected PROPERTIES
 find_package(GTest REQUIRED)
 enable_testing()
 
-# add LLVM libraries, set LLVM_* variables
-find_package(LLVM 5.0 REQUIRED PATHS ${LLVM_DIR})
-message(STATUS "LLVM_DIR: ${LLVM_DIR}")
-message(STATUS "LLVM_PACKAGE_VERSION: ${LLVM_PACKAGE_VERSION}")
-
-if(NOT LLVM_ENABLE_RTTI)
-    target_compile_options(TestLLVMExpected PRIVATE ${DISABLE_RTTI_FLAG})
-endif()
-
-message(STATUS "LLVM Source Directory: ${LLVM_BUILD_MAIN_SRC_DIR}")
-message(STATUS "LLVM Build Directory: ${LLVM_BUILD_BINARY_DIR}")
+target_compile_options(TestLLVMExpected PRIVATE ${DISABLE_RTTI_FLAG})
 
 target_include_directories(TestLLVMExpected PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}/include
-    ${LLVM_INCLUDE_DIRS}
-)
-
-# LLVM definitions
-separate_arguments(LLVM_DEFINITIONS)
-target_compile_definitions(TestLLVMExpected PRIVATE
-    ${LLVM_DEFINITIONS}
-)
-
-# LLVM dependencies
-llvm_map_components_to_libnames(LLVM_LIBS
-    core
-    support
 )
 
 target_link_libraries(TestLLVMExpected PRIVATE
     GTest::GTest
     GTest::Main
-    ${LLVM_LIBS}
 )
 
 message("")
