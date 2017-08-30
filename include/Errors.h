@@ -14,6 +14,7 @@
 #pragma once
 
 #include <memory>
+#include <iterator>
 #include <ostream>
 #include <system_error>
 #include <type_traits>
