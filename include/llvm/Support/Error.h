@@ -19,7 +19,6 @@
 #include "llvm/Support/Compiler.h"
 #include "llvm/Support/Debug.h"
 #include "llvm/Support/ErrorHandling.h"
-#include "llvm/Support/ErrorOr.h"
 #include <algorithm>
 #include <cassert>
 #include <cstdint>
@@ -638,6 +637,18 @@ private:
   Error *Err;
 };
 
+/// \brief Stores a reference that can be changed.
+template <typename T>
+class ReferenceStorage {
+  T *Storage;
+
+public:
+  ReferenceStorage(T &Ref) : Storage(&Ref) {}
+
+  operator T &() const { return *Storage; }
+  T &get() const { return *Storage; }
+};
+
 /// Tagged union holding either a T or a Error.
 ///
 /// This class parallels ErrorOr, but replaces error_code with Error. Since
@@ -949,20 +960,6 @@ Error errorCodeToError(std::error_code EC);
 /// This method requires that Err be Error() or an ECError, otherwise it
 /// will trigger a call to abort().
 std::error_code errorToErrorCode(Error Err);
-
-/// Convert an ErrorOr<T> to an Expected<T>.
-template <typename T> Expected<T> errorOrToExpected(ErrorOr<T> &&EO) {
-  if (auto EC = EO.getError())
-    return errorCodeToError(EC);
-  return std::move(*EO);
-}
-
-/// Convert an Expected<T> to an ErrorOr<T>.
-template <typename T> ErrorOr<T> expectedToErrorOr(Expected<T> &&E) {
-  if (auto Err = E.takeError())
-    return errorToErrorCode(std::move(Err));
-  return std::move(*E);
-}
 
 /// This class wraps a string in an Error.
 ///
