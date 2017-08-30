@@ -16,6 +16,7 @@
 #define LLVM_SUPPORT_ERRORHANDLING_H
 
 #include <string>
+#include <system_error>
 
 #ifdef __GNUC__
 #define EXPECTED_ATTRIBUTE_NORETURN __attribute__((noreturn))
@@ -48,6 +49,12 @@
 # define EXPECTED_BUILTIN_UNREACHABLE __builtin_unreachable()
 #elif defined(_MSC_VER)
 # define EXPECTED_BUILTIN_UNREACHABLE __assume(false)
+#endif
+
+#if _WIN32
+namespace llvm {
+std::error_code mapWindowsError(unsigned EV);
+}
 #endif
 
 namespace llvm {

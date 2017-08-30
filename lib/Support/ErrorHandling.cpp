@@ -18,7 +18,6 @@
 #include "llvm/Support/Errc.h"
 #include "llvm/Support/Error.h"
 #include "llvm/Support/Signals.h"
-#include "llvm/Support/WindowsError.h"
 #include <cassert>
 #include <cstdlib>
 #include <mutex>
