@@ -37,7 +37,7 @@ namespace {
                "not be converted to a known std::error_code. Please file a "
                "bug.";
       }
-      llvm_unreachable("Unhandled error code");
+      expected_unreachable("Unhandled error code");
     }
   };
 

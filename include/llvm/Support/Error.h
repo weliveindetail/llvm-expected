@@ -16,7 +16,6 @@
 
 #include "llvm/Config/abi-breaking.h"
 #include "llvm/Support/AlignOf.h"
-#include "llvm/Support/Compiler.h"
 #include "llvm/Support/Debug.h"
 #include "llvm/Support/ErrorHandling.h"
 #include <algorithm>
@@ -33,6 +32,19 @@
 #include <type_traits>
 #include <utility>
 #include <vector>
+
+/// EXPECTED_NODISCARD - Warn if a type or return value is discarded.
+#if __cplusplus > 201402L && __has_cpp_attribute(nodiscard)
+#define EXPECTED_NODISCARD [[nodiscard]]
+#elif !__cplusplus
+// Workaround for llvm.org/PR23435, since clang 3.6 and below emit a spurious
+// error when __has_cpp_attribute is given a scoped attribute in C mode.
+#define EXPECTED_NODISCARD
+#elif __has_cpp_attribute(clang::warn_unused_result)
+#define EXPECTED_NODISCARD [[clang::warn_unused_result]]
+#else
+#define EXPECTED_NODISCARD
+#endif
 
 namespace llvm {
 
@@ -149,7 +161,7 @@ private:
 /// *All* Error instances must be checked before destruction, even if
 /// they're moved-assigned or constructed from Success values that have already
 /// been checked. This enforces checking through all levels of the call stack.
-class LLVM_NODISCARD Error {
+class EXPECTED_NODISCARD Error {
   // ErrorList needs to be able to yank ErrorInfoBase pointers out of this
   // class to add to the error list.
   friend class ErrorList;
@@ -655,7 +667,7 @@ public:
 /// Error cannot be copied, this class replaces getError() with
 /// takeError(). It also adds an bool errorIsA<ErrT>() method for testing the
 /// error class type.
-template <class T> class LLVM_NODISCARD Expected {
+template <class T> class EXPECTED_NODISCARD Expected {
   template <class T1> friend class ExpectedAsOutParameter;
   template <class OtherT> friend class Expected;
 
@@ -1033,8 +1045,8 @@ private:
 
 /// Report a serious error, calling any installed error handler. See
 /// ErrorHandling.h.
-LLVM_ATTRIBUTE_NORETURN void report_fatal_error(Error Err,
-                                                bool gen_crash_diag = true);
+EXPECTED_ATTRIBUTE_NORETURN void report_fatal_error(Error Err,
+                                                    bool gen_crash_diag = true);
 
 /// Report a fatal error if Err is a failure value.
 ///
@@ -1051,7 +1063,7 @@ LLVM_ATTRIBUTE_NORETURN void report_fatal_error(Error Err,
 ///   @endcode
 inline void cantFail(Error Err) {
   if (Err)
-    llvm_unreachable("Failure value returned from cantFail wrapped call");
+    expected_unreachable("Failure value returned from cantFail wrapped call");
 }
 
 /// Report a fatal error if ValOrErr is a failure value, otherwise unwraps and
@@ -1072,7 +1084,7 @@ T cantFail(Expected<T> ValOrErr) {
   if (ValOrErr)
     return std::move(*ValOrErr);
   else
-    llvm_unreachable("Failure value returned from cantFail wrapped call");
+    expected_unreachable("Failure value returned from cantFail wrapped call");
 }
 
 /// Report a fatal error if ValOrErr is a failure value, otherwise unwraps and
@@ -1093,9 +1105,11 @@ T& cantFail(Expected<T&> ValOrErr) {
   if (ValOrErr)
     return *ValOrErr;
   else
-    llvm_unreachable("Failure value returned from cantFail wrapped call");
+    expected_unreachable("Failure value returned from cantFail wrapped call");
 }
 
 } // end namespace llvm
+
+#undef EXPECTED_NODISCARD
 
 #endif // LLVM_SUPPORT_ERROR_H

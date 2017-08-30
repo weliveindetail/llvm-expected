@@ -15,8 +15,40 @@
 #ifndef LLVM_SUPPORT_ERRORHANDLING_H
 #define LLVM_SUPPORT_ERRORHANDLING_H
 
-#include "llvm/Support/Compiler.h"
 #include <string>
+
+#ifdef __GNUC__
+#define EXPECTED_ATTRIBUTE_NORETURN __attribute__((noreturn))
+#elif defined(_MSC_VER)
+#define EXPECTED_ATTRIBUTE_NORETURN __declspec(noreturn)
+#else
+#define EXPECTED_ATTRIBUTE_NORETURN
+#endif
+
+/// \macro EXPECTED_GNUC_PREREQ
+/// \brief Extend the default __GNUC_PREREQ even if glibc's features.h isn't
+/// available.
+#ifndef EXPECTED_GNUC_PREREQ
+# if defined(__GNUC__) && defined(__GNUC_MINOR__) && defined(__GNUC_PATCHLEVEL__)
+#  define EXPECTED_GNUC_PREREQ(maj, min, patch) \
+    ((__GNUC__ << 20) + (__GNUC_MINOR__ << 10) + __GNUC_PATCHLEVEL__ >= \
+     ((maj) << 20) + ((min) << 10) + (patch))
+# elif defined(__GNUC__) && defined(__GNUC_MINOR__)
+#  define EXPECTED_GNUC_PREREQ(maj, min, patch) \
+    ((__GNUC__ << 20) + (__GNUC_MINOR__ << 10) >= ((maj) << 20) + ((min) << 10))
+# else
+#  define EXPECTED_GNUC_PREREQ(maj, min, patch) 0
+# endif
+#endif
+
+/// EXPECTED_BUILTIN_UNREACHABLE - On compilers which support it, expands
+/// to an expression which states that it is undefined behavior for the
+/// compiler to reach this point.  Otherwise is not defined.
+#if __has_builtin(__builtin_unreachable) || EXPECTED_GNUC_PREREQ(4, 5, 0)
+# define EXPECTED_BUILTIN_UNREACHABLE __builtin_unreachable()
+#elif defined(_MSC_VER)
+# define EXPECTED_BUILTIN_UNREACHABLE __assume(false)
+#endif
 
 namespace llvm {
 class StringRef;
@@ -69,10 +101,10 @@ class StringRef;
 /// standard error, followed by a newline.
 /// After the error handler is called this function will call exit(1), it
 /// does not return.
-LLVM_ATTRIBUTE_NORETURN void report_fatal_error(const char *reason,
-                                                bool gen_crash_diag = true);
-LLVM_ATTRIBUTE_NORETURN void report_fatal_error(std::string reason,
-                                                bool gen_crash_diag = true);
+EXPECTED_ATTRIBUTE_NORETURN void report_fatal_error(const char *reason,
+                                                    bool gen_crash_diag = true);
+EXPECTED_ATTRIBUTE_NORETURN void report_fatal_error(std::string reason,
+                                                    bool gen_crash_diag = true);
 
 /// Installs a new bad alloc error handler that should be used whenever a
 /// bad alloc error, e.g. failing malloc/calloc, is encountered by LLVM.
@@ -111,11 +143,12 @@ void remove_bad_alloc_error_handler();
 void report_bad_alloc_error(const char *Reason, bool GenCrashDiag = true);
 
 /// This function calls abort(), and prints the optional message to stderr.
-/// Use the llvm_unreachable macro (that adds location info), instead of
+/// Use the expected_unreachable macro (that adds location info), instead of
 /// calling this function directly.
-LLVM_ATTRIBUTE_NORETURN void
-llvm_unreachable_internal(const char *msg = nullptr, const char *file = nullptr,
-                          unsigned line = 0);
+EXPECTED_ATTRIBUTE_NORETURN void
+expected_unreachable_internal(const char *msg = nullptr,
+                              const char *file = nullptr,
+                              unsigned line = 0);
 }
 
 /// Marks that the current location is not supposed to be reachable.
@@ -127,12 +160,15 @@ llvm_unreachable_internal(const char *msg = nullptr, const char *file = nullptr,
 /// Use this instead of assert(0).  It conveys intent more clearly and
 /// allows compilers to omit some unnecessary code.
 #ifndef NDEBUG
-#define llvm_unreachable(msg) \
-  ::llvm::llvm_unreachable_internal(msg, __FILE__, __LINE__)
-#elif defined(LLVM_BUILTIN_UNREACHABLE)
-#define llvm_unreachable(msg) LLVM_BUILTIN_UNREACHABLE
+#define expected_unreachable(msg) \
+  ::llvm::expected_unreachable_internal(msg, __FILE__, __LINE__)
+#elif defined(EXPECTED_BUILTIN_UNREACHABLE)
+#define expected_unreachable(msg) EXPECTED_BUILTIN_UNREACHABLE
 #else
-#define llvm_unreachable(msg) ::llvm::llvm_unreachable_internal()
+#define expected_unreachable(msg) ::llvm::expected_unreachable_internal()
 #endif
+
+#undef EXPECTED_BUILTIN_UNREACHABLE
+#undef EXPECTED_GNUC_PREREQ
 
 #endif

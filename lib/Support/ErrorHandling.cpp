@@ -158,7 +158,7 @@ void llvm::report_bad_alloc_error(const char *Reason, bool GenCrashDiag) {
 
   if (Handler) {
     Handler(HandlerData, Reason, GenCrashDiag);
-    llvm_unreachable("bad alloc handler should not return");
+    expected_unreachable("bad alloc handler should not return");
   }
 
 #ifdef LLVM_ENABLE_EXCEPTIONS
@@ -174,8 +174,8 @@ void llvm::report_bad_alloc_error(const char *Reason, bool GenCrashDiag) {
 #endif
 }
 
-void llvm::llvm_unreachable_internal(const char *msg, const char *file,
-                                     unsigned line) {
+void llvm::expected_unreachable_internal(const char *msg, const char *file,
+                                         unsigned line) {
   // This code intentionally doesn't call the ErrorHandler callback, because
   // llvm_unreachable is intended to be used to indicate "impossible"
   // situations, and not legitimate runtime errors.
@@ -186,10 +186,10 @@ void llvm::llvm_unreachable_internal(const char *msg, const char *file,
     std::cerr << " at " << file << ":" << line;
   std::cerr << "!\n";
   abort();
-#ifdef LLVM_BUILTIN_UNREACHABLE
+#ifdef EXPECTED_BUILTIN_UNREACHABLE
   // Windows systems and possibly others don't declare abort() to be noreturn,
   // so use the unreachable builtin to avoid a Clang self-host warning.
-  LLVM_BUILTIN_UNREACHABLE;
+  EXPECTED_BUILTIN_UNREACHABLE;
 #endif
 }
 

@@ -25,7 +25,6 @@ add_executable(TestLLVMExpected
     include/llvm/Config/config.h
 
     include/llvm/Support/AlignOf.h
-    include/llvm/Support/Compiler.h
     include/llvm/Support/Error.h
     include/llvm/Support/ErrorHandling.h
 

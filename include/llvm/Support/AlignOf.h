@@ -14,8 +14,31 @@
 #ifndef LLVM_SUPPORT_ALIGNOF_H
 #define LLVM_SUPPORT_ALIGNOF_H
 
-#include "llvm/Support/Compiler.h"
 #include <cstddef>
+
+/// \macro EXPECTED_GNUC_PREREQ
+/// \brief Extend the default __GNUC_PREREQ even if glibc's features.h isn't
+/// available.
+#ifndef EXPECTED_GNUC_PREREQ
+# if defined(__GNUC__) && defined(__GNUC_MINOR__) && defined(__GNUC_PATCHLEVEL__)
+#  define EXPECTED_GNUC_PREREQ(maj, min, patch) \
+    ((__GNUC__ << 20) + (__GNUC_MINOR__ << 10) + __GNUC_PATCHLEVEL__ >= \
+     ((maj) << 20) + ((min) << 10) + (patch))
+# elif defined(__GNUC__) && defined(__GNUC_MINOR__)
+#  define EXPECTED_GNUC_PREREQ(maj, min, patch) \
+    ((__GNUC__ << 20) + (__GNUC_MINOR__ << 10) >= ((maj) << 20) + ((min) << 10))
+# else
+#  define EXPECTED_GNUC_PREREQ(maj, min, patch) 0
+# endif
+#endif
+
+/// \macro EXPECTED_ALIGNAS
+/// \brief Used to specify a minimum alignment for a structure or variable.
+#if __GNUC__ && !__has_feature(cxx_alignas) && !EXPECTED_GNUC_PREREQ(4, 8, 1)
+# define EXPECTED_ALIGNAS(x) __attribute__((aligned(x)))
+#else
+# define EXPECTED_ALIGNAS(x) alignas(x)
+#endif
 
 namespace llvm {
 
@@ -34,7 +57,7 @@ namespace llvm {
 
 template<std::size_t Alignment, std::size_t Size>
 struct AlignedCharArray {
-  LLVM_ALIGNAS(Alignment) char buffer[Size];
+  EXPECTED_ALIGNAS(Alignment) char buffer[Size];
 };
 
 #else // _MSC_VER
@@ -87,18 +110,18 @@ struct AlignedCharArray<8, Size> {
 // The rest of these are provided with a __declspec(align(...)) and we simply
 // can't pass them by-value as function arguments on MSVC.
 
-#define LLVM_ALIGNEDCHARARRAY_TEMPLATE_ALIGNMENT(x) \
+#define EXPECTED_ALIGNEDCHARARRAY_TEMPLATE_ALIGNMENT(x) \
   template<std::size_t Size> \
   struct AlignedCharArray<x, Size> { \
     __declspec(align(x)) char buffer[Size]; \
   };
 
-LLVM_ALIGNEDCHARARRAY_TEMPLATE_ALIGNMENT(16)
-LLVM_ALIGNEDCHARARRAY_TEMPLATE_ALIGNMENT(32)
-LLVM_ALIGNEDCHARARRAY_TEMPLATE_ALIGNMENT(64)
-LLVM_ALIGNEDCHARARRAY_TEMPLATE_ALIGNMENT(128)
+EXPECTED_ALIGNEDCHARARRAY_TEMPLATE_ALIGNMENT(16)
+EXPECTED_ALIGNEDCHARARRAY_TEMPLATE_ALIGNMENT(32)
+EXPECTED_ALIGNEDCHARARRAY_TEMPLATE_ALIGNMENT(64)
+EXPECTED_ALIGNEDCHARARRAY_TEMPLATE_ALIGNMENT(128)
 
-#undef LLVM_ALIGNEDCHARARRAY_TEMPLATE_ALIGNMENT
+#undef EXPECTED_ALIGNEDCHARARRAY_TEMPLATE_ALIGNMENT
 
 #endif // _MSC_VER
 
@@ -142,5 +165,8 @@ struct AlignedCharArrayUnion : llvm::AlignedCharArray<
                                      T6, T7, T8, T9, T10>)> {
 };
 } // end namespace llvm
+
+#undef EXPECTED_ALIGNAS
+#undef EXPECTED_GNUC_PREREQ
 
 #endif // LLVM_SUPPORT_ALIGNOF_H
