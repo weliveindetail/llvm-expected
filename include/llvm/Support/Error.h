@@ -14,8 +14,6 @@
 #ifndef LLVM_SUPPORT_ERROR_H
 #define LLVM_SUPPORT_ERROR_H
 
-#include "llvm/ADT/SmallVector.h"
-#include "llvm/ADT/StringExtras.h"
 #include "llvm/Config/abi-breaking.h"
 #include "llvm/Support/AlignOf.h"
 #include "llvm/Support/Compiler.h"
@@ -575,11 +573,16 @@ void logAllUnhandledErrors(Error E, std::ostream &OS, std::string ErrorBanner);
 /// Write all error messages (if any) in E to a string. The newline character
 /// is used to separate error messages.
 inline std::string toString(Error E) {
-  SmallVector<std::string, 2> Errors;
+  std::vector<std::string> Errors;
   handleAllErrors(std::move(E), [&Errors](const ErrorInfoBase &EI) {
     Errors.push_back(EI.message());
   });
-  return join(Errors.begin(), Errors.end(), "\n");
+
+  std::stringstream msg;
+  std::copy(Errors.begin(), Errors.end(),
+            std::ostream_iterator<std::string>(msg, "\n"));
+
+  return msg.str();
 }
 
 /// Consume a Error without doing anything. This method should be used
