@@ -9,41 +9,36 @@
 
 #include "llvm/Support/Error.h"
 #include "llvm/Support/ErrorHandling.h"
-#include "llvm/Support/ManagedStatic.h"
 #include <system_error>
 
 using namespace llvm;
 
 namespace {
 
-  enum class ErrorErrorCode : int {
-    MultipleErrors = 1,
-    InconvertibleError
-  };
+enum class ErrorErrorCode : int { MultipleErrors = 1, InconvertibleError };
 
-  // FIXME: This class is only here to support the transition to llvm::Error. It
-  // will be removed once this transition is complete. Clients should prefer to
-  // deal with the Error value directly, rather than converting to error_code.
-  class ErrorErrorCategory : public std::error_category {
-  public:
-    const char *name() const noexcept override { return "Error"; }
+// FIXME: This class is only here to support the transition to llvm::Error. It
+// will be removed once this transition is complete. Clients should prefer to
+// deal with the Error value directly, rather than converting to error_code.
+class ErrorErrorCategory : public std::error_category {
+public:
+  const char *name() const noexcept override { return "Error"; }
 
-    std::string message(int condition) const override {
-      switch (static_cast<ErrorErrorCode>(condition)) {
-      case ErrorErrorCode::MultipleErrors:
-        return "Multiple errors";
-      case ErrorErrorCode::InconvertibleError:
-        return "Inconvertible error value. An error has occurred that could "
-               "not be converted to a known std::error_code. Please file a "
-               "bug.";
-      }
-      expected_unreachable("Unhandled error code");
+  std::string message(int condition) const override {
+    switch (static_cast<ErrorErrorCode>(condition)) {
+    case ErrorErrorCode::MultipleErrors:
+      return "Multiple errors";
+    case ErrorErrorCode::InconvertibleError:
+      return "Inconvertible error value. An error has occurred that could "
+             "not be converted to a known std::error_code. Please file a "
+             "bug.";
     }
-  };
-
+    expected_unreachable("Unhandled error code");
+  }
+};
 }
 
-static ManagedStatic<ErrorErrorCategory> ErrorErrorCat;
+static ErrorErrorCategory ErrorErrorCat;
 
 namespace llvm {
 
@@ -63,15 +58,14 @@ void logAllUnhandledErrors(Error E, std::ostream &OS, std::string ErrorBanner) {
   });
 }
 
-
 std::error_code ErrorList::convertToErrorCode() const {
   return std::error_code(static_cast<int>(ErrorErrorCode::MultipleErrors),
-                         *ErrorErrorCat);
+                         ErrorErrorCat);
 }
 
 std::error_code inconvertibleErrorCode() {
   return std::error_code(static_cast<int>(ErrorErrorCode::InconvertibleError),
-                         *ErrorErrorCat);
+                         ErrorErrorCat);
 }
 
 Error errorCodeToError(std::error_code EC) {
@@ -95,9 +89,7 @@ StringError::StringError(std::string Msg, std::error_code EC)
 
 void StringError::log(std::ostream &OS) const { OS << Msg; }
 
-std::error_code StringError::convertToErrorCode() const {
-  return EC;
-}
+std::error_code StringError::convertToErrorCode() const { return EC; }
 
 void report_fatal_error(Error Err, bool GenCrashDiag) {
   assert(Err && "report_fatal_error called with success value");

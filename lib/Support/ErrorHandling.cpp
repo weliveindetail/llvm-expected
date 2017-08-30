@@ -14,24 +14,21 @@
 
 #include "llvm/Support/ErrorHandling.h"
 #include "llvm/Config/config.h"
-#include "llvm/Support/Debug.h"
-#include "llvm/Support/Errc.h"
 #include "llvm/Support/Error.h"
-#include "llvm/Support/Signals.h"
 #include <cassert>
 #include <cstdlib>
+#include <iostream>
 #include <mutex>
 #include <new>
-#include <iostream>
 #include <sstream>
 
 #if defined(EXPECTED_HAVE_UNISTD_H)
-# include <unistd.h>
+#include <unistd.h>
 #endif
 
 #if defined(_MSC_VER)
-# include <io.h>
-# include <fcntl.h>
+#include <fcntl.h>
+#include <io.h>
 #endif
 
 /// EXPECTED_EXTENSION - Support compilers where we have a keyword to suppress
@@ -42,7 +39,7 @@
 #define EXPECTED_EXTENSION
 #endif
 
-#if EXPECTED_ENABLE_THREADS == 1
+#if EXPECTED_ENABLE_THREADS
 #define IF_THREADS(X) X
 #else
 #define IF_THREADS(X)
@@ -86,7 +83,7 @@ void llvm::report_fatal_error(const char *Reason, bool GenCrashDiag) {
 
 void llvm::report_fatal_error(std::string Reason, bool GenCrashDiag) {
   llvm::fatal_error_handler_t handler = nullptr;
-  void* handlerData = nullptr;
+  void *handlerData = nullptr;
   {
     // Only acquire the mutex while reading the handler, so as not to invoke a
     // user-supplied callback under a lock.
@@ -108,11 +105,6 @@ void llvm::report_fatal_error(std::string Reason, bool GenCrashDiag) {
     ssize_t written = ::write(2, MessageStr.c_str(), MessageStr.size());
     (void)written; // If something went wrong, we deliberately just give up.
   }
-
-  // If we reached here, we are failing ungracefully. Run the interrupt handlers
-  // to make sure any special cleanups get done, in particular that we remove
-  // files registered with RemoveFileOnSignal.
-  sys::RunInterruptHandlers();
 
   exit(1);
 }
@@ -145,6 +137,11 @@ void llvm::expected_unreachable_internal(const char *msg, const char *file,
   case x:                                                                      \
     return make_error_code(errc::y)
 
+/// Useful helper for Windows system errors:
+///
+///   @code{.cpp}
+///   std::error_code ec = llvm::mapWindowsError(::GetLastError());
+///   @endcode
 std::error_code llvm::mapWindowsError(unsigned EV) {
   switch (EV) {
     MAP_ERR_TO_COND(ERROR_ACCESS_DENIED, permission_denied);

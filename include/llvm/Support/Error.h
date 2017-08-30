@@ -15,7 +15,6 @@
 #define LLVM_SUPPORT_ERROR_H
 
 #include "llvm/Support/AlignOf.h"
-#include "llvm/Support/Debug.h"
 #include "llvm/Support/ErrorHandling.h"
 #include <algorithm>
 #include <cassert>
@@ -246,7 +245,7 @@ public:
 
   /// Returns the dynamic class id of this error, or null if this is a success
   /// value.
-  const void* dynamicClassID() const {
+  const void *dynamicClassID() const {
     if (!getPtr())
       return nullptr;
     return getPtr()->dynamicClassID();
@@ -269,17 +268,15 @@ private:
   }
 
   ErrorInfoBase *getPtr() const {
-    return reinterpret_cast<ErrorInfoBase*>(
-             reinterpret_cast<uintptr_t>(Payload) &
-             ~static_cast<uintptr_t>(0x1));
+    return reinterpret_cast<ErrorInfoBase *>(
+        reinterpret_cast<uintptr_t>(Payload) & ~static_cast<uintptr_t>(0x1));
   }
 
   void setPtr(ErrorInfoBase *EI) {
 #ifndef NDEBUG
-    Payload = reinterpret_cast<ErrorInfoBase*>(
-                (reinterpret_cast<uintptr_t>(EI) &
-                 ~static_cast<uintptr_t>(0x1)) |
-                (reinterpret_cast<uintptr_t>(Payload) & 0x1));
+    Payload = reinterpret_cast<ErrorInfoBase *>(
+        (reinterpret_cast<uintptr_t>(EI) & ~static_cast<uintptr_t>(0x1)) |
+        (reinterpret_cast<uintptr_t>(Payload) & 0x1));
 #else
     Payload = EI;
 #endif
@@ -294,10 +291,9 @@ private:
   }
 
   void setChecked(bool V) {
-    Payload = reinterpret_cast<ErrorInfoBase*>(
-                (reinterpret_cast<uintptr_t>(Payload) &
-                  ~static_cast<uintptr_t>(0x1)) |
-                  (V ? 0 : 1));
+    Payload = reinterpret_cast<ErrorInfoBase *>(
+        (reinterpret_cast<uintptr_t>(Payload) & ~static_cast<uintptr_t>(0x1)) |
+        (V ? 0 : 1));
   }
 
   std::unique_ptr<ErrorInfoBase> takePayload() {
@@ -649,8 +645,7 @@ private:
 };
 
 /// \brief Stores a reference that can be changed.
-template <typename T>
-class ReferenceStorage {
+template <typename T> class ReferenceStorage {
   T *Storage;
 
 public:
@@ -692,7 +687,8 @@ public:
       : HasError(true)
 #ifndef NDEBUG
         // Expected is unchecked upon construction in Debug builds.
-        , Unchecked(true)
+        ,
+        Unchecked(true)
 #endif
   {
     assert(Err && "Cannot create Expected<T> from Error success value.");
@@ -713,7 +709,8 @@ public:
       : HasError(false)
 #ifndef NDEBUG
         // Expected is unchecked upon construction in Debug builds.
-        , Unchecked(true)
+        ,
+        Unchecked(true)
 #endif
   {
     new (getStorage()) storage_type(std::forward<OtherT>(Val));
@@ -888,14 +885,16 @@ private:
   void assertIsChecked() {
 #ifndef NDEBUG
     if (Unchecked) {
-      std::cerr << "Expected<T> must be checked before access or destruction.\n";
+      std::cerr
+          << "Expected<T> must be checked before access or destruction.\n";
       if (HasError) {
         std::cerr << "Unchecked Expected<T> contained error:\n";
         (*getErrorStorage())->log(std::cerr);
       } else
-        std::cerr << "Expected<T> value was in success state. (Note: Expected<T> "
-                     "values in success mode must still be checked prior to being "
-                     "destroyed).\n";
+        std::cerr
+            << "Expected<T> value was in success state. (Note: Expected<T> "
+               "values in success mode must still be checked prior to being "
+               "destroyed).\n";
       abort();
     }
 #endif
@@ -914,11 +913,9 @@ private:
 /// Helper for Expected<T>s used as out-parameters.
 ///
 /// See ErrorAsOutParameter.
-template <typename T>
-class ExpectedAsOutParameter {
+template <typename T> class ExpectedAsOutParameter {
 public:
-  ExpectedAsOutParameter(Expected<T> *ValOrErr)
-    : ValOrErr(ValOrErr) {
+  ExpectedAsOutParameter(Expected<T> *ValOrErr) : ValOrErr(ValOrErr) {
     if (ValOrErr)
       (void)!!*ValOrErr;
   }
@@ -960,7 +957,7 @@ protected:
 /// It should only be used in this situation, and should never be used where a
 /// sensible conversion to std::error_code is available, as attempts to convert
 /// to/from this error will result in a fatal error. (i.e. it is a programmatic
-///error to try to convert such a value).
+/// error to try to convert such a value).
 std::error_code inconvertibleErrorCode();
 
 /// Helper for converting an std::error_code to a Error.
@@ -1022,9 +1019,10 @@ public:
     return std::move(*E);
   }
 
-  /// Check E. If it's in a success state then return the contained reference. If
+  /// Check E. If it's in a success state then return the contained reference.
+  /// If
   /// it's in a failure state log the error(s) and exit.
-  template <typename T> T& operator()(Expected<T&> &&E) const {
+  template <typename T> T &operator()(Expected<T &> &&E) const {
     checkError(E.takeError());
     return *E;
   }
@@ -1078,8 +1076,7 @@ inline void cantFail(Error Err) {
 ///
 ///   int X = cantFail(foo(false));
 ///   @endcode
-template <typename T>
-T cantFail(Expected<T> ValOrErr) {
+template <typename T> T cantFail(Expected<T> ValOrErr) {
   if (ValOrErr)
     return std::move(*ValOrErr);
   else
@@ -1099,8 +1096,7 @@ T cantFail(Expected<T> ValOrErr) {
 ///
 ///   Bar &X = cantFail(foo(false));
 ///   @endcode
-template <typename T>
-T& cantFail(Expected<T&> ValOrErr) {
+template <typename T> T &cantFail(Expected<T &> ValOrErr) {
   if (ValOrErr)
     return *ValOrErr;
   else
