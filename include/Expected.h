@@ -18,6 +18,7 @@
 #include <type_traits>
 
 #include "ErrorBase.h"
+#include "ForceAllErrors.h"
 
 namespace llvm {
 
@@ -66,6 +67,7 @@ public:
   /// but triggers the assertion above.
   Expected(ErrorSuccess) = delete;
 
+#ifdef NDEBUG
   /// Create an Expected<T> success value from the given OtherT value, which
   /// must be convertible to T.
   template <typename OtherT>
@@ -73,14 +75,28 @@ public:
            typename std::enable_if<std::is_convertible<OtherT, T>::value>::type
                * = nullptr)
       : HasError(false)
-#ifndef NDEBUG
-        // Expected is unchecked upon construction in Debug builds.
-        ,
-        Unchecked(true)
-#endif
   {
     new (getStorage()) storage_type(std::forward<OtherT>(Val));
   }
+#else
+  /// Create an Expected<T> success value from the given OtherT value, which
+  /// must be convertible to T. Expected is unchecked upon construction in
+  /// Debug builds.
+  template <typename OtherT>
+  Expected(OtherT &&Val,
+           typename std::enable_if<std::is_convertible<OtherT, T>::value>::type
+               * = nullptr)
+      : HasError(false), Unchecked(true)
+  {
+    if (ForceAllErrors::TurnInstanceIntoError()) {
+      HasError = true;
+      new (getErrorStorage()) error_type(ForceAllErrors::mockError());
+      return;
+    }
+
+    new (getStorage()) storage_type(std::forward<OtherT>(Val));
+  }
+#endif
 
   /// Move construct an Expected<T> value.
   Expected(Expected &&Other) { moveConstruct(std::move(Other)); }
