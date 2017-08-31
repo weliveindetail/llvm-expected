@@ -39,7 +39,10 @@ add_library(LLVMExpected
     include/ErrorBase.h
     include/Errors.h
     include/Expected.h
+    include/ForceAllErrors.h
+
     lib/ErrorBase.cpp
+    lib/ForceAllErrors.cpp
 )
 
 target_include_directories(LLVMExpected PUBLIC
