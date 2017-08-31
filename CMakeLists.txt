@@ -84,3 +84,4 @@ endif()
 
 add_subdirectory(tests)
 add_subdirectory(benchmarks/LLVMExpected)
+add_subdirectory(benchmarks/Exception)
