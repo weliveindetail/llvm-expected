@@ -1,71 +1,87 @@
 cmake_minimum_required(VERSION 3.2)
 
-project(TestLLVMExpected VERSION 1.0 LANGUAGES CXX)
+project(LLVMExpected VERSION 1.0 LANGUAGES CXX)
 
 if(WIN32)
     set(OS_NAME "Win")
-    set(DISABLE_RTTI_FLAG /GR-)
 elseif(APPLE)
     set(OS_NAME "OSX")
-    set(DISABLE_RTTI_FLAG -fno-rtti)
 elseif(UNIX)
     set(OS_NAME "Linux")
-    set(DISABLE_RTTI_FLAG -fno-rtti)
 else()
     message(FATAL_ERROR "Operating system not supported")
 endif()
+
+if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+    set(DISABLE_RTTI_FLAG /GR-)
+    set(DISABLE_EXCEPTIONS_FLAG "")
+    set(DISABLE_STACKPROTECTOR_FLAG /GS-)
+    set(DISABLE_FRAMEPOINTER_FLAG /Oy)
+elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    set(DISABLE_RTTI_FLAG -fno-rtti)
+    set(DISABLE_EXCEPTIONS_FLAG -fno-exceptions)
+    set(DISABLE_STACKPROTECTOR_FLAG -fno-stack-protector)
+    set(DISABLE_FRAMEPOINTER_FLAG -fomit-frame-pointer)
+else()
+    message(FATAL_ERROR "Compiler not supported")
+endif()
+
+message("")
+message("Global")
+
 message(STATUS "System: ${OS_NAME}")
+message(STATUS "Compiler: ${CMAKE_CXX_COMPILER_ID}")
+message(STATUS "C++ flags: ${CMAKE_CXX_FLAGS}")
+message(STATUS "C++ flags Debug: ${CMAKE_CXX_FLAGS_DEBUG}")
+message(STATUS "C++ flags Release: ${CMAKE_CXX_FLAGS_RELEASE}")
 
-add_executable(TestLLVMExpected
-    TestLLVMExpected.cpp
-
-    ExtraPayloadError.h
-    ExtraPayloadError.cpp
-
+add_library(LLVMExpected
     include/ErrorBase.h
     include/Errors.h
     include/Expected.h
-
     lib/ErrorBase.cpp
 )
 
-set_target_properties(TestLLVMExpected PROPERTIES
+target_include_directories(LLVMExpected PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
+)
+
+set_target_properties(LLVMExpected PROPERTIES
     CXX_STANDARD 14
     CXX_STANDARD_REQUIRED ON
     CXX_EXTENSIONS OFF
 )
 
-# add GTest libraries
-find_package(GTest REQUIRED)
-enable_testing()
-
-target_compile_options(TestLLVMExpected PRIVATE ${DISABLE_RTTI_FLAG})
-
-target_include_directories(TestLLVMExpected PRIVATE
-    ${CMAKE_CURRENT_SOURCE_DIR}
-    ${CMAKE_CURRENT_SOURCE_DIR}/include
-)
-
-target_link_libraries(TestLLVMExpected PRIVATE
-    GTest::GTest
-    GTest::Main
+target_compile_options(LLVMExpected PUBLIC 
+    ${DISABLE_RTTI_FLAG}
+    ${DISABLE_EXCEPTIONS_FLAG}
+    ${DISABLE_STACKPROTECTOR_FLAG}
+    ${DISABLE_FRAMEPOINTER_FLAG}
 )
 
 message("")
-message("TestLLVMExpected")
+message("LLVMExpected")
 
-get_target_property(ALL_ID TestLLVMExpected INCLUDE_DIRECTORIES)
-message(STATUS "Include directories: ${ALL_ID}")
+get_target_property(Prop LLVMExpected INCLUDE_DIRECTORIES)
+if (NOT Prop STREQUAL "Prop-NOTFOUND")
+    message(STATUS "Include directories: ${Prop}")
+endif()
 
-get_target_property(ALL_LL TestLLVMExpected LINK_LIBRARIES)
-message(STATUS "Link libraries: ${ALL_LL}")
+get_target_property(Prop LLVMExpected LINK_LIBRARIES)
+if (NOT Prop STREQUAL "Prop-NOTFOUND")
+    message(STATUS "Link libraries: ${Prop}")
+endif()
 
-get_target_property(ALL_CO TestLLVMExpected COMPILE_OPTIONS)
-message(STATUS "Compile options: ${ALL_CO}")
+get_target_property(Prop LLVMExpected COMPILE_OPTIONS)
+if (NOT Prop STREQUAL "Prop-NOTFOUND")
+    message(STATUS "Compile options: ${Prop}")
+endif()
 
-get_target_property(ALL_CD TestLLVMExpected COMPILE_DEFINITIONS)
-message(STATUS "Compile definitions: ${ALL_CD}")
+get_target_property(Prop LLVMExpected COMPILE_DEFINITIONS)
+if (NOT Prop STREQUAL "Prop-NOTFOUND")
+    message(STATUS "Compile definitions: ${Prop}")
+endif()
 
-message(STATUS "Other flags: ${CMAKE_CXX_FLAGS}")
-message(STATUS "Other flags Debug: ${CMAKE_CXX_FLAGS_DEBUG}")
-message(STATUS "Other flags Release: ${CMAKE_CXX_FLAGS_RELEASE}")
+add_subdirectory(tests)
+add_subdirectory(benchmarks/LLVMExpected)
+add_subdirectory(benchmarks/Exception)
