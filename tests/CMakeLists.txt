@@ -8,6 +8,8 @@ add_executable(TestLLVMExpected
     TestErrorSuccess.h
     TestExtraPayloadError.h
     TestStringError.h
+    TestForceAllErrorsDebug.h
+    TestForceAllErrorsRelease.h
 
     ExtraPayloadError.h
     ExtraPayloadError.cpp

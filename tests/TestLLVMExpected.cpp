@@ -6,6 +6,12 @@
 #include "TestErrorList.h"
 #include "TestExtraPayloadError.h"
 
+#ifdef NDEBUG
+#include "TestForceAllErrorsRelease.h"
+#else
+#include "TestForceAllErrorsDebug.h"
+#endif
+
 int main(int argc, char **argv) {
   ::testing::InitGoogleTest(&argc, argv);
 
