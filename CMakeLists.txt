@@ -83,3 +83,4 @@ if (NOT Prop STREQUAL "Prop-NOTFOUND")
 endif()
 
 add_subdirectory(tests)
+add_subdirectory(benchmarks/LLVMExpected)
