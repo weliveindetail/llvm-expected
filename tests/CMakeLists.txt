@@ -10,6 +10,8 @@ add_executable(TestLLVMExpected
     TestForceAllErrorsDebug.h
     TestForceAllErrorsRelease.h
 
+    TestForceAllErrorsChallenges.h
+
     Common.h
     CustomError.h
     CustomError.cpp
