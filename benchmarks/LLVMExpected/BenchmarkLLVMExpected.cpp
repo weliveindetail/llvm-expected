@@ -1,5 +1,6 @@
 #include "BenchPerfCategories.h"
 #include "BenchOptimizations.h"
+#include "BenchOverheadExample.h"
 #include "BenchSuccessRates.h"
 
 #include <benchmark/benchmark.h>
@@ -35,6 +36,9 @@ BENCHMARK(BM_Rate_SuccessAlways_Expected);
 BENCHMARK(BM_Rate_Success2outOf3_Expected);
 BENCHMARK(BM_Rate_Success1outOf3_Expected);
 BENCHMARK(BM_Rate_SuccessNever_Expected);
+
+BENCHMARK(BM_SuccessRate_OverheadExample_ErrorCode)->Arg(100)->Arg(66)->Arg(33)->Arg(0);
+BENCHMARK(BM_SuccessRate_OverheadExample_Expected)->Arg(100)->Arg(66)->Arg(33)->Arg(0);
 
 int main(int argc, char **argv) {
   benchmark::Initialize(&argc, argv);

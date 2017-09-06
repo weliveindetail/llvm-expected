@@ -5,6 +5,8 @@ add_executable(BenchmarkLLVMExpected
     FastRand.h
     BenchOptimizations.h
     BenchOptimizations.cpp
+    BenchOverheadExample.h
+    BenchOverheadExample.cpp
     BenchPerfCategories.h
     BenchPerfCategories.cpp
     BenchSuccessRates.h
