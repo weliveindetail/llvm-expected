@@ -27,15 +27,8 @@ BENCHMARK(BM_RVO_Expected);
 BENCHMARK(BM_NRVO_Raw);
 BENCHMARK(BM_NRVO_Expected);
 
-BENCHMARK(BM_Rate_SuccessAlways_ErrorCode);
-BENCHMARK(BM_Rate_Success2outOf3_ErrorCode);
-BENCHMARK(BM_Rate_Success1outOf3_ErrorCode);
-BENCHMARK(BM_Rate_SuccessNever_ErrorCode);
-
-BENCHMARK(BM_Rate_SuccessAlways_Expected);
-BENCHMARK(BM_Rate_Success2outOf3_Expected);
-BENCHMARK(BM_Rate_Success1outOf3_Expected);
-BENCHMARK(BM_Rate_SuccessNever_Expected);
+BENCHMARK(BM_SuccessRate_Minimal_ErrorCode)->Arg(100)->Arg(66)->Arg(33)->Arg(0);
+BENCHMARK(BM_SuccessRate_Minimal_Expected)->Arg(100)->Arg(66)->Arg(33)->Arg(0);
 
 BENCHMARK(BM_SuccessRate_OverheadExample_ErrorCode)->Arg(100)->Arg(66)->Arg(33)->Arg(0);
 BENCHMARK(BM_SuccessRate_OverheadExample_Expected)->Arg(100)->Arg(66)->Arg(33)->Arg(0);
