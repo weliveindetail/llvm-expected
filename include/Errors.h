@@ -186,15 +186,12 @@ Error handleErrors(Error E, HandlerTs &&... Hs) {
 /// after the handlers have run, abort() will be called.
 template <typename... HandlerTs>
 void handleAllErrors(Error E, HandlerTs &&... Handlers) {
-  auto F = handleErrors(std::move(E), std::forward<HandlerTs>(Handlers)...);
-  // Cast 'F' to bool to set the 'Checked' flag if it's a success value:
-  (void)!F;
+  cantFail(handleErrors(std::move(E), std::forward<HandlerTs>(Handlers)...));
 }
 
 /// Check that E is a non-error, then drop it.
 inline void handleAllErrors(Error E) {
-  // Cast 'E' to a bool to set the 'Checked' flag if it's a success value:
-  (void)!E;
+  cantFail(std::move(E));
 }
 
 /// Log all errors (if any) in E to OS. If there are any errors, ErrorBanner

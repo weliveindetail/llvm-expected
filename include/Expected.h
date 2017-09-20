@@ -292,6 +292,43 @@ private:
 #endif
 };
 
+/// Handle any errors (if present) in an Expected<T>, then try a recovery path.
+///
+/// If the incoming value is a success value it is returned unmodified. If it
+/// is a failure value then it the contained error is passed to handleErrors.
+/// If handleErrors is able to handle the error then the RecoveryPath functor
+/// is called to supply the final result. If handleErrors is not able to
+/// handle all errors then the unhandled errors are returned.
+///
+/// This utility enables the follow pattern:
+///
+///   @code{.cpp}
+///   enum FooStrategy { Aggressive, Conservative };
+///   Expected<Foo> foo(FooStrategy S);
+///
+///   auto ResultOrErr =
+///     handleExpected(
+///       foo(Aggressive),
+///       []() { return foo(Conservative); },
+///       [](AggressiveStrategyError&) {
+///         // Implicitly conusme this - we'll recover by using a conservative
+///         // strategy.
+///       });
+///
+///   @endcode
+template <typename T, typename RecoveryFtor, typename... HandlerTs>
+Expected<T> handleExpected(Expected<T> ValOrErr, RecoveryFtor &&RecoveryPath,
+                           HandlerTs &&... Handlers) {
+  if (ValOrErr)
+    return ValOrErr;
+
+  if (auto Err = handleErrors(ValOrErr.takeError(),
+                              std::forward<HandlerTs>(Handlers)...))
+    return std::move(Err);
+
+  return RecoveryPath();
+}
+
 void logAllUnhandledErrors(Error E, std::ostream &OS, std::string ErrorBanner);
 
 /// Helper for check-and-exit error handling.
@@ -363,24 +400,6 @@ private:
   Expected<T> *ValOrErr;
 };
 
-/// Report a fatal error if Err is a failure value.
-///
-/// This function can be used to wrap calls to fallible functions ONLY when it
-/// is known that the Error will always be a success value. E.g.
-///
-///   @code{.cpp}
-///   // foo only attempts the fallible operation if DoFallibleOperation is
-///   // true. If DoFallibleOperation is false then foo always returns
-///   // Error::success().
-///   Error foo(bool DoFallibleOperation);
-///
-///   cantFail(foo(false));
-///   @endcode
-inline void cantFail(Error Err) {
-  if (Err)
-    expected_unreachable("Failure value returned from cantFail wrapped call");
-}
-
 /// Report a fatal error if ValOrErr is a failure value, otherwise unwraps and
 /// returns the contained value.
 ///
@@ -394,11 +413,15 @@ inline void cantFail(Error Err) {
 ///
 ///   int X = cantFail(foo(false));
 ///   @endcode
-template <typename T> T cantFail(Expected<T> ValOrErr) {
+template <typename T>
+T cantFail(Expected<T> ValOrErr, const char *Msg = nullptr) {
   if (ValOrErr)
     return std::move(*ValOrErr);
-  else
-    expected_unreachable("Failure value returned from cantFail wrapped call");
+  else {
+    if (!Msg)
+      Msg = "Failure value returned from cantFail wrapped call";
+    expected_unreachable(Msg);
+  }
 }
 
 /// Report a fatal error if ValOrErr is a failure value, otherwise unwraps and
@@ -414,11 +437,15 @@ template <typename T> T cantFail(Expected<T> ValOrErr) {
 ///
 ///   Bar &X = cantFail(foo(false));
 ///   @endcode
-template <typename T> T &cantFail(Expected<T &> ValOrErr) {
+template <typename T>
+T &cantFail(Expected<T &> ValOrErr, const char *Msg = nullptr) {
   if (ValOrErr)
     return *ValOrErr;
-  else
-    expected_unreachable("Failure value returned from cantFail wrapped call");
+  else {
+    if (!Msg)
+      Msg = "Failure value returned from cantFail wrapped call";
+    expected_unreachable(Msg);
+  }
 }
 
 } // namespace llvm
