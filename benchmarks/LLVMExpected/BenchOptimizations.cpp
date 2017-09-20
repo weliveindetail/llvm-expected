@@ -101,7 +101,7 @@ static std::vector<int> NoRVO_Move() noexcept {
     fastrand(), fastrand(), fastrand(), fastrand(),
     fastrand(), fastrand(), fastrand(), fastrand()
   };
-  return std::move(res);
+  return std::move(res); // warning here is intentional
 }
 
 void REF_NoRVO_Move() noexcept {
