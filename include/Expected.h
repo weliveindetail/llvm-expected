@@ -413,11 +413,15 @@ private:
 ///
 ///   int X = cantFail(foo(false));
 ///   @endcode
-template <typename T> T cantFail(Expected<T> ValOrErr) {
+template <typename T>
+T cantFail(Expected<T> ValOrErr, const char *Msg = nullptr) {
   if (ValOrErr)
     return std::move(*ValOrErr);
-  else
-    expected_unreachable("Failure value returned from cantFail wrapped call");
+  else {
+    if (!Msg)
+      Msg = "Failure value returned from cantFail wrapped call";
+    expected_unreachable(Msg);
+  }
 }
 
 /// Report a fatal error if ValOrErr is a failure value, otherwise unwraps and
@@ -433,11 +437,15 @@ template <typename T> T cantFail(Expected<T> ValOrErr) {
 ///
 ///   Bar &X = cantFail(foo(false));
 ///   @endcode
-template <typename T> T &cantFail(Expected<T &> ValOrErr) {
+template <typename T>
+T &cantFail(Expected<T &> ValOrErr, const char *Msg = nullptr) {
   if (ValOrErr)
     return *ValOrErr;
-  else
-    expected_unreachable("Failure value returned from cantFail wrapped call");
+  else {
+    if (!Msg)
+      Msg = "Failure value returned from cantFail wrapped call";
+    expected_unreachable(Msg);
+  }
 }
 
 } // namespace llvm

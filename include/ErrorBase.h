@@ -736,9 +736,12 @@ private:
 ///
 ///   cantFail(foo(false));
 ///   @endcode
-inline void cantFail(Error Err) {
-  if (Err)
-    expected_unreachable("Failure value returned from cantFail wrapped call");
+inline void cantFail(Error Err, const char *Msg = nullptr) {
+  if (Err) {
+    if (!Msg)
+      Msg = "Failure value returned from cantFail wrapped call";
+    expected_unreachable(Msg);
+  }
 }
 
 /// \brief Stores a reference that can be changed.

@@ -488,6 +488,12 @@ TEST(Error, CantFailSuccess) {
 #ifndef NDEBUG
 TEST(Error, CantFailDeath) {
   EXPECT_DEATH(
+      cantFail(make_error<StringError>("foo", inconvertibleErrorCode()),
+               "Cantfail call failed"),
+      "Cantfail call failed")
+    << "cantFail(Error) did not cause an abort for failure value";
+
+  EXPECT_DEATH(
       {
         auto IEC = inconvertibleErrorCode();
         int X = cantFail(Expected<int>(make_error<StringError>("foo", IEC)));
