@@ -17,6 +17,8 @@ add_executable(TestLLVMExpected
     CustomError.cpp
     ExtraPayloadError.h
     ExtraPayloadError.cpp
+
+    ErrorTest.cpp # copied from /unittests/Support/ErrorTest.cpp
 )
 
 set_target_properties(TestLLVMExpected PROPERTIES
