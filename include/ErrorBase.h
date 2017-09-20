@@ -723,6 +723,24 @@ private:
   Error *Err;
 };
 
+/// Report a fatal error if Err is a failure value.
+///
+/// This function can be used to wrap calls to fallible functions ONLY when it
+/// is known that the Error will always be a success value. E.g.
+///
+///   @code{.cpp}
+///   // foo only attempts the fallible operation if DoFallibleOperation is
+///   // true. If DoFallibleOperation is false then foo always returns
+///   // Error::success().
+///   Error foo(bool DoFallibleOperation);
+///
+///   cantFail(foo(false));
+///   @endcode
+inline void cantFail(Error Err) {
+  if (Err)
+    expected_unreachable("Failure value returned from cantFail wrapped call");
+}
+
 /// \brief Stores a reference that can be changed.
 template <typename T> class ReferenceStorage {
   T *Storage;
