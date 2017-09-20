@@ -7,13 +7,13 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/Error.h"
+#include "Errors.h"
+#include "Expected.h"
 
-#include "llvm/ADT/Twine.h"
-#include "llvm/Support/Errc.h"
-#include "llvm/Support/ErrorHandling.h"
 #include "gtest/gtest.h"
+
 #include <memory>
+#include <ostream>
 
 using namespace llvm;
 
@@ -29,12 +29,13 @@ public:
   int getInfo() const { return Info; }
 
   // Log this error to a stream.
-  void log(raw_ostream &OS) const override {
+  void log(std::ostream &OS) const override {
     OS << "CustomError { " << getInfo() << "}";
   }
 
   std::error_code convertToErrorCode() const override {
-    llvm_unreachable("CustomError doesn't support ECError conversion");
+    std::cerr << "CustomError doesn't support ECError conversion";
+    exit(1);
   }
 
   // Used by ErrorInfo::classID.
@@ -65,12 +66,13 @@ public:
   int getExtraInfo() const { return ExtraInfo; }
 
   // Log this error to a stream.
-  void log(raw_ostream &OS) const override {
+  void log(std::ostream &OS) const override {
     OS << "CustomSubError { " << getInfo() << ", " << getExtraInfo() << "}";
   }
 
   std::error_code convertToErrorCode() const override {
-    llvm_unreachable("CustomSubError doesn't support ECError conversion");
+    std::cerr << "CustomError doesn't support ECError conversion";
+    exit(1);
   }
 
   // Used by ErrorInfo::classID.
@@ -102,7 +104,7 @@ TEST(Error, CheckedSuccess) {
 }
 
 // Test that unchecked succes values cause an abort.
-#if LLVM_ENABLE_ABI_BREAKING_CHECKS
+#ifndef NDEBUG
 TEST(Error, UncheckedSuccess) {
   EXPECT_DEATH({ Error E = Error::success(); },
                "Program aborted due to an unhandled Error:")
@@ -128,7 +130,7 @@ TEST(Error, ErrorAsOutParameterChecked) {
 }
 
 // Test that ErrorAsOutParameter clears the checked flag on destruction.
-#if LLVM_ENABLE_ABI_BREAKING_CHECKS
+#ifndef NDEBUG
 TEST(Error, ErrorAsOutParameterUnchecked) {
   EXPECT_DEATH({ Error E = Error::success(); errAsOutParamHelper(E); },
                "Program aborted due to an unhandled Error:")
@@ -139,7 +141,7 @@ TEST(Error, ErrorAsOutParameterUnchecked) {
 // Check that we abort on unhandled failure cases. (Force conversion to bool
 // to make sure that we don't accidentally treat checked errors as handled).
 // Test runs in debug mode only.
-#if LLVM_ENABLE_ABI_BREAKING_CHECKS
+#ifndef NDEBUG
 TEST(Error, UncheckedError) {
   auto DropUnhandledError = []() {
     Error E = make_error<CustomError>(42);
@@ -377,11 +379,11 @@ TEST(Error, ConsumeError) {
 
 // Test that handleAllUnhandledErrors crashes if an error is not caught.
 // Test runs in debug mode only.
-#if LLVM_ENABLE_ABI_BREAKING_CHECKS
+#ifndef NDEBUG
 TEST(Error, FailureToHandle) {
   auto FailToHandle = []() {
     handleAllErrors(make_error<CustomError>(7), [&](const CustomSubError &SE) {
-      errs() << "This should never be called";
+      std::cerr << "This should never be called";
       exit(1);
     });
   };
@@ -396,7 +398,7 @@ TEST(Error, FailureToHandle) {
 // Test that handleAllUnhandledErrors crashes if an error is returned from a
 // handler.
 // Test runs in debug mode only.
-#if LLVM_ENABLE_ABI_BREAKING_CHECKS
+#ifndef NDEBUG
 TEST(Error, FailureFromHandler) {
   auto ReturnErrorFromHandler = []() {
     handleAllErrors(make_error<CustomError>(7),
@@ -429,15 +431,15 @@ TEST(Error, CatchErrorFromHandler) {
 
 TEST(Error, StringError) {
   std::string Msg;
-  raw_string_ostream S(Msg);
-  logAllUnhandledErrors(make_error<StringError>("foo" + Twine(42),
+  std::ostringstream S(Msg);
+  logAllUnhandledErrors(make_error<StringError>("foo" + std::to_string(42),
                                                 inconvertibleErrorCode()),
                         S, "");
   EXPECT_EQ(S.str(), "foo42\n") << "Unexpected StringError log result";
 
   auto EC =
-    errorToErrorCode(make_error<StringError>("", errc::invalid_argument));
-  EXPECT_EQ(EC, errc::invalid_argument)
+    errorToErrorCode(make_error<StringError>("", std::make_error_code(std::errc::invalid_argument)));
+  EXPECT_EQ(EC, std::errc::invalid_argument)
     << "Failed to convert StringError to error_code.";
 }
 
@@ -483,7 +485,7 @@ TEST(Error, CantFailSuccess) {
 }
 
 // Test that cantFail results in a crash if you pass it a failure value.
-#if LLVM_ENABLE_ABI_BREAKING_CHECKS && !defined(NDEBUG)
+#ifndef NDEBUG
 TEST(Error, CantFailDeath) {
   EXPECT_DEATH(
       {
@@ -518,7 +520,7 @@ TEST(Error, ExpectedWithReferenceType) {
 // Test Unchecked Expected<T> in success mode.
 // We expect this to blow up the same way Error would.
 // Test runs in debug mode only.
-#if LLVM_ENABLE_ABI_BREAKING_CHECKS
+#ifndef NDEBUG
 TEST(Error, UncheckedExpectedInSuccessModeDestruction) {
   EXPECT_DEATH({ Expected<int> A = 7; },
                "Expected<T> must be checked before access or destruction.")
@@ -529,7 +531,7 @@ TEST(Error, UncheckedExpectedInSuccessModeDestruction) {
 // Test Unchecked Expected<T> in success mode.
 // We expect this to blow up the same way Error would.
 // Test runs in debug mode only.
-#if LLVM_ENABLE_ABI_BREAKING_CHECKS
+#ifndef NDEBUG
 TEST(Error, UncheckedExpectedInSuccessModeAccess) {
   EXPECT_DEATH({ Expected<int> A = 7; *A; },
                "Expected<T> must be checked before access or destruction.")
@@ -540,7 +542,7 @@ TEST(Error, UncheckedExpectedInSuccessModeAccess) {
 // Test Unchecked Expected<T> in success mode.
 // We expect this to blow up the same way Error would.
 // Test runs in debug mode only.
-#if LLVM_ENABLE_ABI_BREAKING_CHECKS
+#ifndef NDEBUG
 TEST(Error, UncheckedExpectedInSuccessModeAssignment) {
   EXPECT_DEATH({ Expected<int> A = 7; A = 7; },
                "Expected<T> must be checked before access or destruction.")
@@ -560,7 +562,7 @@ TEST(Error, ExpectedInFailureMode) {
 // Check that an Expected instance with an error value doesn't allow access to
 // operator*.
 // Test runs in debug mode only.
-#if LLVM_ENABLE_ABI_BREAKING_CHECKS
+#ifndef NDEBUG
 TEST(Error, AccessExpectedInFailureMode) {
   Expected<int> A = make_error<CustomError>(42);
   EXPECT_DEATH(*A, "Expected<T> must be checked before access or destruction.")
@@ -572,7 +574,7 @@ TEST(Error, AccessExpectedInFailureMode) {
 // Check that an Expected instance with an error triggers an abort if
 // unhandled.
 // Test runs in debug mode only.
-#if LLVM_ENABLE_ABI_BREAKING_CHECKS
+#ifndef NDEBUG
 TEST(Error, UnhandledExpectedInFailureMode) {
   EXPECT_DEATH({ Expected<int> A = make_error<CustomError>(42); },
                "Expected<T> must be checked before access or destruction.")
@@ -607,33 +609,12 @@ TEST(Error, ErrorCodeConversions) {
       << "std::error_code() should round-trip via Error conversions";
 
   // Round-trip an error value to check that it converts correctly.
-  EXPECT_EQ(errorToErrorCode(errorCodeToError(errc::invalid_argument)),
-            errc::invalid_argument)
+  auto original = std::errc::invalid_argument;
+  auto roundTrip = errorToErrorCode(errorCodeToError(
+              std::make_error_code(std::errc::invalid_argument)));
+  EXPECT_EQ(original, roundTrip)
       << "std::error_code error value should round-trip via Error "
          "conversions";
-
-  // Round-trip a success value through ErrorOr/Expected to check that it
-  // converts correctly.
-  {
-    auto Orig = ErrorOr<int>(42);
-    auto RoundTripped =
-      expectedToErrorOr(errorOrToExpected(ErrorOr<int>(42)));
-    EXPECT_EQ(*Orig, *RoundTripped)
-      << "ErrorOr<T> success value should round-trip via Expected<T> "
-         "conversions.";
-  }
-
-  // Round-trip a failure value through ErrorOr/Expected to check that it
-  // converts correctly.
-  {
-    auto Orig = ErrorOr<int>(errc::invalid_argument);
-    auto RoundTripped =
-      expectedToErrorOr(
-          errorOrToExpected(ErrorOr<int>(errc::invalid_argument)));
-    EXPECT_EQ(Orig.getError(), RoundTripped.getError())
-      << "ErrorOr<T> failure value should round-trip via Expected<T> "
-         "conversions.";
-  }
 }
 
 // Test that error messages work.
@@ -641,7 +622,7 @@ TEST(Error, ErrorMessage) {
   EXPECT_EQ(toString(Error::success()).compare(""), 0);
 
   Error E1 = make_error<CustomError>(0);
-  EXPECT_EQ(toString(std::move(E1)).compare("CustomError { 0}"), 0);
+  EXPECT_EQ(toString(std::move(E1)).compare("CustomError { 0}\n"), 0);
 
   Error E2 = make_error<CustomError>(0);
   handleAllErrors(std::move(E2), [](const CustomError &CE) {
@@ -651,7 +632,7 @@ TEST(Error, ErrorMessage) {
   Error E3 = joinErrors(make_error<CustomError>(0), make_error<CustomError>(1));
   EXPECT_EQ(toString(std::move(E3))
                 .compare("CustomError { 0}\n"
-                         "CustomError { 1}"),
+                         "CustomError { 1}\n"),
             0);
 }
 
