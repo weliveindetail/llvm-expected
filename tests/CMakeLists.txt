@@ -5,6 +5,7 @@ add_executable(TestLLVMExpected
 
     TestErrorList.cpp
     TestErrorSuccess.cpp
+    TestErrorTypeHierarchies.cpp
     TestExtraPayloadError.cpp
     TestStringError.cpp
     TestForceAllErrorsDebug.cpp
