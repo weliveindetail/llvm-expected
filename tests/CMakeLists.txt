@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 3.2)
 add_executable(TestLLVMExpected
     TestLLVMExpected.cpp
 
+    TestErrorList.cpp
     TestErrorSuccess.cpp
     TestExtraPayloadError.cpp
     TestStringError.cpp
