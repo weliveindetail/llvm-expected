@@ -77,12 +77,12 @@ int GlobPattern::SuccessRate;
 // -----------------------------------------------------------------------------
 
 std::error_code
-OverheadExample_ErrorCode(bool &result, std::string *&errorFileName) noexcept {
+OverheadExample_ErrorCode(bool &result, std::unique_ptr<std::string> &errorFileName) noexcept {
   GlobPatternEC pattern;
   std::string fileName = "[a*.txt";
 
   if (std::error_code ec = GlobPatternEC::create(fileName, pattern)) {
-    errorFileName = new std::string(fileName);
+    errorFileName = std::make_unique<std::string>(fileName);
     return ec;
   }
 
@@ -96,14 +96,13 @@ void BM_SuccessRate_OverheadExample_ErrorCode(benchmark::State &state) {
 
   while (state.KeepRunning()) {
     bool res;
-    std::string *errorFileName = nullptr; // only instantiate in error case
+    std::unique_ptr<std::string> errorFileName = nullptr; // only instantiate in error case
 
     if (std::error_code ec = OverheadExample_ErrorCode(res, errorFileName)) {
       nulls << "[simpleExample Error] " << getErrorDescription(ec) << " ";
-      nulls << errorFileName << "\n";
+      nulls << *errorFileName << "\n";
     }
 
-    delete errorFileName;
     benchmark::DoNotOptimize(res);
   }
 }
