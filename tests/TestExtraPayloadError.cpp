@@ -1,5 +1,3 @@
-#pragma once
-
 #include <memory>
 #include <string>
 
@@ -10,10 +8,6 @@
 
 #include "Common.h"
 #include "ExtraPayloadError.h"
-
-llvm::Expected<int> Expected_AlwaysExtraPayloadError() {
-  return llvm::make_error<ExtraPayloadError>(makeExtraPayload());
-}
 
 TEST(ExtraPayloadError, handleAllErrors)
 {

@@ -1,5 +1,3 @@
-#pragma once
-
 #include <memory>
 #include <string>
 
@@ -9,10 +7,6 @@
 #include <Errors.h>
 
 #include "Common.h"
-
-llvm::Expected<int> Expected_AlwaysSuccess() {
-  return 0;
-}
 
 TEST(ErrorSuccessHandling, cantFail)
 {
@@ -30,5 +24,17 @@ TEST(ErrorSuccessHandling, consumeError)
 
 TEST(ErrorSuccessHandling, ExitOnError)
 {
+  llvm::ExitOnError ExitOnErr;
+
+  ExitOnErr.setBanner("Exit with error: ");
+  ExitOnErr.setExitCodeMapper(
+    [](const llvm::Error &err) {
+      if (err.isA<llvm::StringError>())
+        return 2;
+
+      return 1;
+    }
+  );
+
   ExitOnErr(Expected_AlwaysSuccess()); // no death
 }

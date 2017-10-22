@@ -1,22 +1,9 @@
 #include <gtest/gtest.h>
 
 #include "Common.h"
-#include "TestErrorSuccess.h"
-#include "TestStringError.h"
-#include "TestErrorList.h"
-#include "TestExtraPayloadError.h"
-
-#ifdef NDEBUG
-#include "TestForceAllErrorsRelease.h"
-#else
-#include "TestForceAllErrorsDebug.h"
-#include "TestForceAllErrorsChallenges.h"
-#endif
 
 int main(int argc, char **argv) {
   ::testing::InitGoogleTest(&argc, argv);
-
-  registerExitOnErr();
 
   #ifndef _WIN32
     ::testing::GTEST_FLAG(catch_exceptions) = false;

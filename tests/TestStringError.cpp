@@ -1,5 +1,3 @@
-#pragma once
-
 #include <memory>
 #include <string>
 
@@ -9,11 +7,6 @@
 #include <Errors.h>
 
 #include "Common.h"
-
-llvm::Expected<int> Expected_AlwaysStringError() {
-  return llvm::make_error<llvm::StringError>("StringErrorMessage",
-                                             llvm::inconvertibleErrorCode());
-}
 
 TEST(StringError, consumeError)
 {
@@ -57,6 +50,19 @@ TEST(StringError, handleAllErrors)
 // see main() in TestLLVMExpected.cpp
 TEST(StringError, ExitOnError)
 {
+  llvm::ExitOnError ExitOnErr;
+
+  ExitOnErr.setBanner("Exit with error: ");
+  ExitOnErr.setExitCodeMapper(
+    [](const llvm::Error &err) {
+      if (err.isA<llvm::StringError>())
+        return 2;
+
+      return 1;
+    }
+  );
+
   EXPECT_EXIT(ExitOnErr(Expected_AlwaysStringError()),
-              ::testing::ExitedWithCode(2), "");
+              ::testing::ExitedWithCode(2),
+              "Exit with error: StringErrorMessage");
 }

@@ -1,5 +1,3 @@
-#pragma once
-
 #include <memory>
 #include <string>
 
@@ -12,9 +10,7 @@
 #include "Common.h"
 #include "CustomError.h"
 
-#ifdef NDEBUG
-static_assert(false, "Tests for Debug builds only");
-#endif
+#ifndef NDEBUG
 
 static int ForceAllErrors_sideEffects0_value = 0;
 static int ForceAllErrors_sideEffects1_value = 0;
@@ -428,3 +424,5 @@ TEST(ForceAllErrors, cascadingError_ESanChallenge)
     llvm::consumeError(expected.takeError());
   }
 }
+
+#endif

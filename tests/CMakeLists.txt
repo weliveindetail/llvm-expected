@@ -3,14 +3,13 @@ cmake_minimum_required(VERSION 3.2)
 add_executable(TestLLVMExpected
     TestLLVMExpected.cpp
 
-    TestErrorList.h
-    TestErrorSuccess.h
-    TestExtraPayloadError.h
-    TestStringError.h
-    TestForceAllErrorsDebug.h
-    TestForceAllErrorsRelease.h
+    TestErrorSuccess.cpp
+    TestExtraPayloadError.cpp
+    TestStringError.cpp
+    TestForceAllErrorsDebug.cpp
+    TestForceAllErrorsRelease.cpp
 
-    TestForceAllErrorsChallenges.h
+    TestForceAllErrorsChallenges.cpp
 
     Common.h
     CustomError.h

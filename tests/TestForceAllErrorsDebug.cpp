@@ -1,5 +1,3 @@
-#pragma once
-
 #include <memory>
 #include <string>
 
@@ -11,9 +9,7 @@
 
 #include "Common.h"
 
-#ifdef NDEBUG
-static_assert(false, "Tests for Debug builds only");
-#endif
+#ifndef NDEBUG
 
 llvm::Expected<int> Expected_CountThisInstance() {
   return 0;
@@ -104,3 +100,5 @@ TEST(ForceAllErrors, breakInstance2)
   EXPECT_FALSE(isInSuccessState(expected2));
   llvm::consumeError(expected2.takeError());
 }
+
+#endif

@@ -1,5 +1,3 @@
-#pragma once
-
 #include <memory>
 #include <string>
 
@@ -11,9 +9,7 @@
 
 #include "Common.h"
 
-#ifndef NDEBUG
-static_assert(false, "Tests for Release builds only");
-#endif
+#ifdef NDEBUG
 
 llvm::Expected<int> Expected_BreakThisInstance() {
   return 0;
@@ -49,3 +45,5 @@ TEST(ForceAllErrors, breakInstance1_NotInRelease)
     }
   );
 }
+
+#endif
