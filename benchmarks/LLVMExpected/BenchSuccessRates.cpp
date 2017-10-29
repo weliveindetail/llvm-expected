@@ -57,5 +57,5 @@ void BM_SuccessRate_Minimal_Expected(benchmark::State &state) {
 
 // -----------------------------------------------------------------------------
 
-BENCHMARK(BM_SuccessRate_Minimal_ErrorCode)->Arg(100)->Arg(66)->Arg(33)->Arg(0);
-BENCHMARK(BM_SuccessRate_Minimal_Expected)->Arg(100)->Arg(66)->Arg(33)->Arg(0);
+BENCHMARK(BM_SuccessRate_Minimal_ErrorCode)->Arg(100)->Arg(95)->Arg(50)->Arg(0);
+BENCHMARK(BM_SuccessRate_Minimal_Expected)->Arg(100)->Arg(95)->Arg(50)->Arg(0);
