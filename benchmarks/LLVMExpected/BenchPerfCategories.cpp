@@ -1,5 +1,6 @@
-#include "BenchPerfCategories.h"
 #include "FastRand.h"
+
+#include <benchmark/benchmark.h>
 
 // Runtime for generating a single pseudo-random number
 void BM_Category_FastRand(benchmark::State &state) noexcept {
@@ -108,3 +109,13 @@ void BM_Category_DiskReadAccess(benchmark::State &state) noexcept {
     benchmark::DoNotOptimize(firstChar);
   }
 }
+
+BENCHMARK(BM_Category_FastRand);
+BENCHMARK(BM_Category_FastRand_BranchInstruction);
+BENCHMARK(BM_Category_FastRand_FunctionCall);
+BENCHMARK(BM_Category_FastRand_FunctionPtrCall);
+BENCHMARK(BM_Category_HeapAllocDealloc);
+BENCHMARK(BM_Category_HeapAllocDealloc_UniquePtrMove);
+BENCHMARK(BM_Category_HeapAllocDealloc_SharedPtrMove);
+BENCHMARK(BM_Category_HeapAllocDealloc_SharedPtrCopy);
+BENCHMARK(BM_Category_DiskReadAccess);

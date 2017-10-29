@@ -1,8 +1,11 @@
-#include "BenchOptimizations.h"
 #include "FastRand.h"
 
 #include <Errors.h>
 #include <Expected.h>
+
+#include <benchmark/benchmark.h>
+
+// -----------------------------------------------------------------------------
 
 struct A {
   int value;
@@ -228,3 +231,17 @@ void BM_NRVO_Expected(benchmark::State &state) noexcept {
     REF_NRVO_Expected();
   }
 }
+
+// -----------------------------------------------------------------------------
+
+BENCHMARK(BM_MinStruct_NoInline_Raw);
+BENCHMARK(BM_MinStruct_NoInline_ExpectedSuccess);
+BENCHMARK(BM_MinStruct_NoInline_ExpectedFail);
+
+BENCHMARK(BM_NoRVO_OutParam);
+BENCHMARK(BM_NoRVO_Move);
+BENCHMARK(BM_NoRVO_Copy);
+BENCHMARK(BM_RVO_Raw);
+BENCHMARK(BM_RVO_Expected);
+BENCHMARK(BM_NRVO_Raw);
+BENCHMARK(BM_NRVO_Expected);

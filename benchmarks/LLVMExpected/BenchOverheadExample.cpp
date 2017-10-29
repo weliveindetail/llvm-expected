@@ -1,8 +1,9 @@
-#include "BenchOverheadExample.h"
 #include "FastRand.h"
 
 #include <Errors.h>
 #include <Expected.h>
+
+#include <benchmark/benchmark.h>
 
 #include <chrono>
 #include <system_error>
@@ -132,3 +133,8 @@ void BM_SuccessRate_OverheadExample_Expected(benchmark::State &state) {
     benchmark::DoNotOptimize(res);
   }
 }
+
+// -----------------------------------------------------------------------------
+
+BENCHMARK(BM_SuccessRate_OverheadExample_ErrorCode)->Arg(100)->Arg(66)->Arg(33)->Arg(0);
+BENCHMARK(BM_SuccessRate_OverheadExample_Expected)->Arg(100)->Arg(66)->Arg(33)->Arg(0);

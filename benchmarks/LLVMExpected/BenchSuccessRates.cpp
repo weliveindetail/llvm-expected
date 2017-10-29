@@ -1,10 +1,13 @@
-#include "BenchSuccessRates.h"
 #include "FastRand.h"
 
 #include <Errors.h>
 #include <Expected.h>
 
+#include <benchmark/benchmark.h>
+
 #include <system_error>
+
+// -----------------------------------------------------------------------------
 
 __attribute__((noinline))
 static std::error_code Minimal_ErrorCode(int successRate, int &res) noexcept {
@@ -51,3 +54,8 @@ void BM_SuccessRate_Minimal_Expected(benchmark::State &state) {
 #endif
   }
 }
+
+// -----------------------------------------------------------------------------
+
+BENCHMARK(BM_SuccessRate_Minimal_ErrorCode)->Arg(100)->Arg(66)->Arg(33)->Arg(0);
+BENCHMARK(BM_SuccessRate_Minimal_Expected)->Arg(100)->Arg(66)->Arg(33)->Arg(0);

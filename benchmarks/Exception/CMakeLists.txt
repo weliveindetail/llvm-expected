@@ -12,13 +12,10 @@ endif()
 
 add_executable(BenchmarkException
     BenchmarkException.cpp
-    FastRand.h
-    #BenchOptimizations.h
-    #BenchOptimizations.cpp
-    #BenchPerfCategories.h
-    #BenchPerfCategories.cpp
-    BenchSuccessRates.h
+
     BenchSuccessRates.cpp
+
+    FastRand.h
 )
 
 set_target_properties(BenchmarkException PROPERTIES
