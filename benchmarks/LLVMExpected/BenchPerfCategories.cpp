@@ -2,6 +2,8 @@
 
 #include <benchmark/benchmark.h>
 
+#include <memory>
+
 // Runtime for generating a single pseudo-random number
 void BM_Category_FastRand(benchmark::State &state) noexcept {
   while (state.KeepRunning()) {
@@ -20,12 +22,12 @@ void BM_Category_FastRand_BranchInstruction(benchmark::State &state) noexcept {
   }
 }
 
-__attribute__((noinline))
+ATTRIBUTE_NOINLINE
 void FunctionCall1_NoInline() noexcept {
   benchmark::ClobberMemory();
 }
 
-__attribute__((noinline))
+ATTRIBUTE_NOINLINE
 void FunctionCall2_NoInline() noexcept {
   benchmark::ClobberMemory();
 }
@@ -64,7 +66,7 @@ void BM_Category_HeapAllocDealloc(benchmark::State &state) noexcept {
   }
 }
 
-__attribute__((noinline))
+ATTRIBUTE_NOINLINE
 void UniquePtrReceiver(std::unique_ptr<int> value) noexcept {
   benchmark::DoNotOptimize(value);
 }
@@ -77,7 +79,7 @@ void BM_Category_HeapAllocDealloc_UniquePtrMove(benchmark::State &state) noexcep
   }
 }
 
-__attribute__((noinline))
+ATTRIBUTE_NOINLINE
 void SharedPtrReceiver(std::shared_ptr<int> value) noexcept {
   benchmark::DoNotOptimize(value);
 }

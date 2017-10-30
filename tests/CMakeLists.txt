@@ -28,6 +28,19 @@ set_target_properties(TestLLVMExpected PROPERTIES
     CXX_EXTENSIONS OFF
 )
 
+# use static runtime libraries for MSVC builds
+if(MSVC)
+  set(variables 
+    CMAKE_CXX_FLAGS_DEBUG
+    CMAKE_CXX_FLAGS_RELEASE
+  )
+  foreach(variable ${variables})
+	if(${variable} MATCHES "/MD")
+	  string(REGEX REPLACE "/MD" "/MT" ${variable} "${${variable}}")
+	endif()
+  endforeach()
+endif()
+
 # add GTest libraries
 find_package(GTest REQUIRED)
 enable_testing()

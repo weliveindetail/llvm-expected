@@ -9,7 +9,7 @@
 
 // -----------------------------------------------------------------------------
 
-__attribute__((noinline))
+ATTRIBUTE_NOINLINE
 static std::error_code Minimal_ErrorCode(int successRate, int &res) noexcept {
   if (fastrand() % 100 > successRate)
     return std::error_code(9, std::system_category());
@@ -32,7 +32,7 @@ void BM_SuccessRate_Minimal_ErrorCode(benchmark::State &state) {
 
 // -----------------------------------------------------------------------------
 
-__attribute__((noinline))
+ATTRIBUTE_NOINLINE
 static llvm::Expected<int> Minimal_Expected(int successRate) noexcept {
   if (fastrand() % 100 > successRate)
     return llvm::make_error<llvm::StringError>(

@@ -11,17 +11,17 @@ struct A {
   int value;
 };
 
-__attribute__((noinline))
+ATTRIBUTE_NOINLINE
 static A MinStruct_NoInline_Raw(int input) noexcept {
   return {input};
 }
 
-__attribute__((noinline))
+ATTRIBUTE_NOINLINE
 static llvm::Expected<A> MinStruct_NoInline_ExpectedSuccess(int input) noexcept {
   return A{input};
 }
 
-__attribute__((noinline))
+ATTRIBUTE_NOINLINE
 static llvm::Expected<A> MinStruct_NoInline_ExpectedFail(int input) noexcept {
   return llvm::make_error<llvm::StringError>("mock", llvm::inconvertibleErrorCode());
 }
@@ -73,7 +73,7 @@ void BM_MinStruct_NoInline_ExpectedFail(benchmark::State &state) noexcept {
 
 // -----------------------------------------------------------------------------
 
-__attribute__((noinline))
+ATTRIBUTE_NOINLINE
 static void NoRVO_OutParam(std::vector<int> &v) {
   v.reserve(8);
   v[0] = fastrand();
@@ -98,7 +98,7 @@ void BM_NoRVO_OutParam(benchmark::State &state) noexcept {
   }
 }
 
-__attribute__((noinline))
+ATTRIBUTE_NOINLINE
 static std::vector<int> NoRVO_Move() noexcept {
   std::vector<int> res {
     fastrand(), fastrand(), fastrand(), fastrand(),
@@ -118,7 +118,7 @@ void BM_NoRVO_Move(benchmark::State &state) noexcept {
   }
 }
 
-__attribute__((noinline))
+ATTRIBUTE_NOINLINE
 static std::vector<int> NoRVO_Copy() noexcept {
   std::vector<int> res {
     fastrand(), fastrand(), fastrand(), fastrand(),
@@ -140,7 +140,7 @@ void BM_NoRVO_Copy(benchmark::State &state) noexcept {
 
 // -----------------------------------------------------------------------------
 
-__attribute__((noinline))
+ATTRIBUTE_NOINLINE
 static std::vector<int> RVO_Raw() {
   return {
     fastrand(), fastrand(), fastrand(), fastrand(),
@@ -159,7 +159,7 @@ void BM_RVO_Raw(benchmark::State &state) noexcept {
   }
 }
 
-__attribute__((noinline))
+ATTRIBUTE_NOINLINE
 static llvm::Expected<std::vector<int>> RVO_Expected() {
   return std::vector<int>{
     fastrand(), fastrand(), fastrand(), fastrand(),
@@ -186,7 +186,7 @@ void BM_RVO_Expected(benchmark::State &state) noexcept {
 
 // -----------------------------------------------------------------------------
 
-__attribute__((noinline))
+ATTRIBUTE_NOINLINE
 static std::vector<int> NRVO_Raw() noexcept {
   std::vector<int> res {
     fastrand(), fastrand(), fastrand(), fastrand(),
@@ -206,7 +206,7 @@ void BM_NRVO_Raw(benchmark::State &state) noexcept {
   }
 }
 
-__attribute__((noinline))
+ATTRIBUTE_NOINLINE
 static llvm::Expected<std::vector<int>> NRVO_Expected() {
   std::vector<int> res {
     fastrand(), fastrand(), fastrand(), fastrand(),
