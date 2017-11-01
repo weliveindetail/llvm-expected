@@ -1,5 +1,14 @@
 cmake_minimum_required(VERSION 3.2)
 
+set(BUILD_GTEST ON CACHE BOOL "Include googletest" FORCE)
+set(BUILD_GMOCK OFF CACHE BOOL "Don't include googlemock" FORCE)
+
+cmake_policy(PUSH)
+add_subdirectory(googletest)
+cmake_policy(POP)
+
+enable_testing()
+
 add_executable(TestLLVMExpected
     TestLLVMExpected.cpp
 
@@ -22,12 +31,6 @@ add_executable(TestLLVMExpected
     ErrorTest.cpp # copied from /unittests/Support/ErrorTest.cpp
 )
 
-set_target_properties(TestLLVMExpected PROPERTIES
-    CXX_STANDARD 14
-    CXX_STANDARD_REQUIRED ON
-    CXX_EXTENSIONS OFF
-)
-
 # use static runtime libraries for MSVC builds
 if(MSVC)
   set(variables 
@@ -41,17 +44,13 @@ if(MSVC)
   endforeach()
 endif()
 
-# add GTest libraries
-find_package(GTest REQUIRED)
-enable_testing()
-
 target_include_directories(TestLLVMExpected PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
 target_link_libraries(TestLLVMExpected PRIVATE
     LLVMExpected
-    GTest::GTest
+    gtest
 )
 
 message("")
