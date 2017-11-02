@@ -30,6 +30,18 @@
 #include <utility>
 #include <vector>
 
+#ifndef __has_feature
+# define __has_feature(x) 0
+#endif
+
+#ifndef __has_cpp_attribute
+# define __has_cpp_attribute(x) 0
+#endif
+
+#ifndef __has_builtin
+# define __has_builtin(x) 0
+#endif
+
 /* Define to 1 if you have the <unistd.h> header file. */
 #ifndef _WIN32
 #define EXPECTED_HAVE_UNISTD_H 1

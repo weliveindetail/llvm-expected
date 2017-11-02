@@ -104,7 +104,12 @@ void BM_Category_HeapAllocDealloc_SharedPtrCopy(benchmark::State &state) noexcep
 // Overhead of minimal read access to hard disk
 void BM_Category_DiskReadAccess(benchmark::State &state) noexcept {
   while (state.KeepRunning()) {
+#if defined(_WIN32)
+    FILE *file = fopen("C:/Windows/system.ini", "r");
+#else
     FILE *file = fopen("/usr/include/stdio.h", "r");
+#endif
+
     int firstChar = getc(file);
     fclose(file);
 

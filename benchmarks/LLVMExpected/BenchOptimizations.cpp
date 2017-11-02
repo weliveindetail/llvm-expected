@@ -76,14 +76,14 @@ void BM_MinStruct_NoInline_ExpectedFail(benchmark::State &state) noexcept {
 ATTRIBUTE_NOINLINE
 static void NoRVO_OutParam(std::vector<int> &v) {
   v.reserve(8);
-  v[0] = fastrand();
-  v[1] = fastrand();
-  v[2] = fastrand();
-  v[3] = fastrand();
-  v[4] = fastrand();
-  v[5] = fastrand();
-  v[6] = fastrand();
-  v[7] = fastrand();
+  v.push_back(fastrand());
+  v.push_back(fastrand());
+  v.push_back(fastrand());
+  v.push_back(fastrand());
+  v.push_back(fastrand());
+  v.push_back(fastrand());
+  v.push_back(fastrand());
+  v.push_back(fastrand());
 }
 
 void REF_NoRVO_OutParam() noexcept {
