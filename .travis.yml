@@ -1,5 +1,32 @@
-branches:
-  except:
-  - /.*/
-  only:
-  - travis
+dist: trusty
+sudo: true
+language: c++
+compiler: gcc
+
+addons:
+  apt:
+    sources:
+    - ubuntu-toolchain-r-test
+    packages:
+    - build-essential
+    - cmake
+    - gcc-7
+    - g++-7
+    - libgtest-dev
+
+script:
+    - export CC=gcc-7
+    - export CXX=g++-7
+    - mkdir build-test-debug
+    - cd build-test-debug
+    - cmake -DCMAKE_BUILD_TYPE=Debug -DLLVMEXPECTED_INCLUDE_TESTS=ON ..
+    - cmake --build .
+    - ./tests/TestLLVMExpected
+    - cd ..
+    - mkdir build-bench-release
+    - cd build-bench-release
+    - cmake -DCMAKE_BUILD_TYPE=Release -DLLVMEXPECTED_INCLUDE_BENCHMARKS=ON ..
+    - cmake --build .
+    - ./benchmarks/LLVMExpected/BenchmarkLLVMExpected
+    - ./benchmarks/Exception/BenchmarkException
+ 
