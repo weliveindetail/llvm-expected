@@ -7,7 +7,7 @@
 // -----------------------------------------------------------------------------
 
 ATTRIBUTE_NOINLINE
-static int Minimal_ThrowInt(int successRate) {
+int Minimal_ThrowInt(int successRate) {
   if (fastrand() % 100 > successRate)
     throw successRate;
 
@@ -33,7 +33,7 @@ void BM_SuccessRate_Minimal_ThrowInt(benchmark::State &state) {
 // -----------------------------------------------------------------------------
 
 ATTRIBUTE_NOINLINE
-static int Minimal_ThrowException(int successRate) {
+int Minimal_ThrowException(int successRate) {
   if (fastrand() % 100 > successRate)
     throw std::runtime_error("Mocked Error");
 
