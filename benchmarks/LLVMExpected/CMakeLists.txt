@@ -3,10 +3,12 @@ cmake_minimum_required(VERSION 3.2)
 add_executable(BenchmarkLLVMExpected
     BenchmarkLLVMExpected.cpp
 
-    BenchOptimizations.cpp
-    BenchOverheadExample.cpp
-    BenchPerfCategories.cpp
     BenchSuccessRates.cpp
+    BenchDirectCompareError.cpp
+    BenchDirectCompareExpected.cpp
+    BenchOverheadExample.cpp
+    BenchOptimizations.cpp
+    BenchPerfCategories.cpp
 
     FastRand.h
 )
