@@ -9,81 +9,29 @@ using namespace llvm;
 
 // -----------------------------------------------------------------------------
 
-ATTRIBUTE_NOINLINE
-Expected<int> DC_ExpectedSuccess(int gt10) noexcept {
+template <int N>
+ATTRIBUTE_NOINLINE Expected<int> DC_ExpectedSuccess_Fwd(int gt10) noexcept {
+  benchmark::DoNotOptimize(gt10);
+  return DC_ExpectedSuccess_Fwd<N - 1>(gt10);
+}
+
+template <>
+ATTRIBUTE_NOINLINE Expected<int> DC_ExpectedSuccess_Fwd<0>(int gt10) noexcept {
   if (fastrand() % 10 > gt10) // never happens
     return llvm::make_error<llvm::StringError>(
         "Mocked Error", llvm::inconvertibleErrorCode());
 
+  benchmark::DoNotOptimize(gt10);
   return gt10;
 }
 
-ATTRIBUTE_NOINLINE
-Expected<int> DC_ExpectedSuccessFwd1(int gt10) noexcept {
-  return DC_ExpectedSuccess(gt10);
-}
-
-ATTRIBUTE_NOINLINE
-Expected<int> DC_ExpectedSuccessFwd2(int gt10) noexcept {
-  return DC_ExpectedSuccessFwd1(gt10);
-}
-
-ATTRIBUTE_NOINLINE
-Expected<int> DC_ExpectedSuccessFwd3(int gt10) noexcept {
-  return DC_ExpectedSuccessFwd2(gt10);
-}
-
-void BM_DirectCompareExpected_ExpectedSuccess_Fwd0(benchmark::State &state) {
+template <int N>
+void BM_DirectCompareExpected_ExpectedSuccess_Fwd(benchmark::State &state) {
   std::ostringstream nulls;
 
   while (state.KeepRunning()) {
     int gt10 = fastrand() % 10 + 100;
-    auto res = DC_ExpectedSuccess(gt10);
-
-    if (Error err = res.takeError()) {
-      logAllUnhandledErrors(std::move(err), nulls, "[never happens]");
-    }
-
-    benchmark::DoNotOptimize(res);
-  }
-}
-
-void BM_DirectCompareExpected_ExpectedSuccess_Fwd1(benchmark::State &state) {
-  std::ostringstream nulls;
-
-  while (state.KeepRunning()) {
-    int gt10 = fastrand() % 10 + 100;
-    auto res = DC_ExpectedSuccessFwd1(gt10);
-
-    if (Error err = res.takeError()) {
-      logAllUnhandledErrors(std::move(err), nulls, "[never happens]");
-    }
-
-    benchmark::DoNotOptimize(res);
-  }
-}
-
-void BM_DirectCompareExpected_ExpectedSuccess_Fwd2(benchmark::State &state) {
-  std::ostringstream nulls;
-
-  while (state.KeepRunning()) {
-    int gt10 = fastrand() % 10 + 100;
-    auto res = DC_ExpectedSuccessFwd2(gt10);
-
-    if (Error err = res.takeError()) {
-      logAllUnhandledErrors(std::move(err), nulls, "[never happens]");
-    }
-
-    benchmark::DoNotOptimize(res);
-  }
-}
-
-void BM_DirectCompareExpected_ExpectedSuccess_Fwd3(benchmark::State &state) {
-  std::ostringstream nulls;
-
-  while (state.KeepRunning()) {
-    int gt10 = fastrand() % 10 + 100;
-    auto res = DC_ExpectedSuccessFwd3(gt10);
+    auto res = DC_ExpectedSuccess_Fwd<N>(gt10);
 
     if (Error err = res.takeError()) {
       logAllUnhandledErrors(std::move(err), nulls, "[never happens]");
@@ -95,97 +43,79 @@ void BM_DirectCompareExpected_ExpectedSuccess_Fwd3(benchmark::State &state) {
 
 // -----------------------------------------------------------------------------
 
-ATTRIBUTE_NOINLINE
-std::error_code DC_ErrorCodeSuccess(int gt10, int &res) noexcept {
+template <int N>
+ATTRIBUTE_NOINLINE std::error_code
+DC_ErrorCodeSuccess_Fwd(int gt10, int &res) noexcept {
+  return DC_ErrorCodeSuccess_Fwd<N - 1>(gt10, res);
+}
+
+template<>
+ATTRIBUTE_NOINLINE std::error_code
+DC_ErrorCodeSuccess_Fwd<0>(int gt10, int &res) noexcept {
   if (fastrand() % 10 > gt10)
     return std::error_code(9, std::system_category());
 
+  benchmark::DoNotOptimize(gt10);
   res = gt10;
   return std::error_code();
 }
 
-ATTRIBUTE_NOINLINE
-std::error_code DC_ErrorCodeSuccessFwd0(int gt10, int &res) noexcept {
-  return DC_ErrorCodeSuccess(gt10, res);
-}
-
-ATTRIBUTE_NOINLINE
-std::error_code DC_ErrorCodeSuccessFwd1(int gt10, int &res) noexcept {
-  return DC_ErrorCodeSuccessFwd0(gt10, res);
-}
-
-ATTRIBUTE_NOINLINE
-std::error_code DC_ErrorCodeSuccessFwd2(int gt10, int &res) noexcept {
-  return DC_ErrorCodeSuccessFwd1(gt10, res);
-}
-
-ATTRIBUTE_NOINLINE
-std::error_code DC_ErrorCodeSuccessFwd3(int gt10, int &res) noexcept {
-  return DC_ErrorCodeSuccessFwd2(gt10, res);
-}
-
-void BM_DirectCompareExpected_ErrorCodeSuccess_Fwd0(benchmark::State &state) {
+template <int N>
+void BM_DirectCompareExpected_ErrorCodeSuccess_Fwd(benchmark::State &state) {
   std::ostringstream nulls;
 
   while (state.KeepRunning()) {
     int res;
     int gt10 = fastrand() % 10 + 100;
-    if (std::error_code ec = DC_ErrorCodeSuccess(gt10, res)) {
+    if (std::error_code ec = DC_ErrorCodeSuccess_Fwd<N>(gt10, res)) {
       nulls << "[never happens]" << ec;
     }
-  }
-}
-
-void BM_DirectCompareExpected_ErrorCodeSuccess_Fwd1(benchmark::State &state) {
-  std::ostringstream nulls;
-
-  while (state.KeepRunning()) {
-    int res;
-    int gt10 = fastrand() % 10 + 100;
-    if (std::error_code ec = DC_ErrorCodeSuccessFwd1(gt10, res)) {
-      nulls << "[never happens]" << ec;
-    }
-
-    benchmark::DoNotOptimize(res);
-  }
-}
-
-void BM_DirectCompareExpected_ErrorCodeSuccess_Fwd2(benchmark::State &state) {
-  std::ostringstream nulls;
-
-  while (state.KeepRunning()) {
-    int res;
-    int gt10 = fastrand() % 10 + 100;
-    if (std::error_code ec = DC_ErrorCodeSuccessFwd2(gt10, res)) {
-      nulls << "[never happens]" << ec;
-    }
-
-    benchmark::DoNotOptimize(res);
-  }
-}
-
-void BM_DirectCompareExpected_ErrorCodeSuccess_Fwd3(benchmark::State &state) {
-  std::ostringstream nulls;
-
-  while (state.KeepRunning()) {
-    int res;
-    int gt10 = fastrand() % 10 + 100;
-    if (std::error_code ec = DC_ErrorCodeSuccessFwd3(gt10, res)) {
-      nulls << "[never happens]" << ec;
-    }
-
-    benchmark::DoNotOptimize(res);
   }
 }
 
 // -----------------------------------------------------------------------------
 
-BENCHMARK(BM_DirectCompareExpected_ExpectedSuccess_Fwd0);
-BENCHMARK(BM_DirectCompareExpected_ExpectedSuccess_Fwd1);
-BENCHMARK(BM_DirectCompareExpected_ExpectedSuccess_Fwd2);
-BENCHMARK(BM_DirectCompareExpected_ExpectedSuccess_Fwd3);
+template <int N>
+ATTRIBUTE_NOINLINE int DC_AdHocSuccess_Fwd(int gt10, int &res) noexcept {
+  return DC_AdHocSuccess_Fwd<N - 1>(gt10, res);
+}
 
-BENCHMARK(BM_DirectCompareExpected_ErrorCodeSuccess_Fwd0);
-BENCHMARK(BM_DirectCompareExpected_ErrorCodeSuccess_Fwd1);
-BENCHMARK(BM_DirectCompareExpected_ErrorCodeSuccess_Fwd2);
-BENCHMARK(BM_DirectCompareExpected_ErrorCodeSuccess_Fwd3);
+template<>
+ATTRIBUTE_NOINLINE int DC_AdHocSuccess_Fwd<0>(int gt10, int &res) noexcept {
+  if (fastrand() % 10 > gt10)
+    return 9;
+
+  benchmark::DoNotOptimize(gt10);
+  res = gt10;
+  return 0;
+}
+
+template <int N>
+void BM_DirectCompareExpected_AdHocSuccess_Fwd(benchmark::State &state) {
+  std::ostringstream nulls;
+
+  while (state.KeepRunning()) {
+    int res;
+    int gt10 = fastrand() % 10 + 100;
+    if (int ec = DC_AdHocSuccess_Fwd<N>(gt10, res)) {
+      nulls << "[never happens]" << ec;
+    }
+  }
+}
+
+// -----------------------------------------------------------------------------
+
+BENCHMARK_TEMPLATE1(BM_DirectCompareExpected_ExpectedSuccess_Fwd, 0);
+BENCHMARK_TEMPLATE1(BM_DirectCompareExpected_ExpectedSuccess_Fwd, 2);
+BENCHMARK_TEMPLATE1(BM_DirectCompareExpected_ExpectedSuccess_Fwd, 8);
+BENCHMARK_TEMPLATE1(BM_DirectCompareExpected_ExpectedSuccess_Fwd, 32);
+
+BENCHMARK_TEMPLATE1(BM_DirectCompareExpected_ErrorCodeSuccess_Fwd, 0);
+BENCHMARK_TEMPLATE1(BM_DirectCompareExpected_ErrorCodeSuccess_Fwd, 2);
+BENCHMARK_TEMPLATE1(BM_DirectCompareExpected_ErrorCodeSuccess_Fwd, 8);
+BENCHMARK_TEMPLATE1(BM_DirectCompareExpected_ErrorCodeSuccess_Fwd, 32);
+
+BENCHMARK_TEMPLATE1(BM_DirectCompareExpected_AdHocSuccess_Fwd, 0);
+BENCHMARK_TEMPLATE1(BM_DirectCompareExpected_AdHocSuccess_Fwd, 2);
+BENCHMARK_TEMPLATE1(BM_DirectCompareExpected_AdHocSuccess_Fwd, 8);
+BENCHMARK_TEMPLATE1(BM_DirectCompareExpected_AdHocSuccess_Fwd, 32);
