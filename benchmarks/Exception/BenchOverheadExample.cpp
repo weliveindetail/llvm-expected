@@ -10,8 +10,12 @@
 
 class GlobPattern {
 public:
+  GlobPattern() noexcept {
+    Gt10 = fastrand() % 10 + 100;
+  }
+
   static GlobPattern create(std::string input) {
-    if (fastrand() % 100 > SuccessRate)
+    if (fastrand() % 10 > Gt10)
       throw std::runtime_error("invalid glob pattern: " + input);
 
     return GlobPattern();
@@ -22,31 +26,35 @@ public:
     return (fastrand() % 10 > 4);
   }
 
-  // helper function for benchmark
-  static void setSuccessRate(int percent) noexcept { SuccessRate = percent; }
-
 private:
-  static int SuccessRate;
+  static int Gt10;
 };
 
-int GlobPattern::SuccessRate;
+int GlobPattern::Gt10;
 
 // -----------------------------------------------------------------------------
 
-ATTRIBUTE_NOINLINE bool OverheadExample_ThrowException() {
+template <int N>
+ATTRIBUTE_NOINLINE bool OverheadExample_ThrowException_Fwd() {
+  return OverheadExample_ThrowException_Fwd<N - 1>();
+}
+
+template <>
+ATTRIBUTE_NOINLINE bool OverheadExample_ThrowException_Fwd<0>() {
   std::string fileName = "[a*.txt";
 
   GlobPattern pattern = GlobPattern::create(std::move(fileName));
   return pattern.match("...");
 }
 
-void BM_SuccessRate_OverheadExample_ThrowException(benchmark::State &state) {
+template <int N>
+void BM_OverheadExample_ThrowException_Fwd(benchmark::State &state) {
   std::ostringstream nulls;
 
   while (state.KeepRunning()) {
     bool res;
     try {
-      res = OverheadExample_ThrowException();
+      res = OverheadExample_ThrowException_Fwd<N>();
     } catch (std::runtime_error e) {
       nulls << "[OverheadExample] " << e.what() << "\n";
     }
@@ -56,4 +64,7 @@ void BM_SuccessRate_OverheadExample_ThrowException(benchmark::State &state) {
 
 // -----------------------------------------------------------------------------
 
-BENCHMARK(BM_SuccessRate_OverheadExample_ThrowException)->Arg(100)->Arg(95)->Arg(50)->Arg(0);
+BENCHMARK_TEMPLATE1(BM_OverheadExample_ThrowException_Fwd, 0);
+BENCHMARK_TEMPLATE1(BM_OverheadExample_ThrowException_Fwd, 8);
+BENCHMARK_TEMPLATE1(BM_OverheadExample_ThrowException_Fwd, 16);
+BENCHMARK_TEMPLATE1(BM_OverheadExample_ThrowException_Fwd, 64);
