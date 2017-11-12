@@ -14,14 +14,6 @@ using namespace llvm;
 // -----------------------------------------------------------------------------
 // helpers
 
-bool simulateSomeWork() noexcept {
-  int v = 0;
-  for (int i = 0; i < 1; i++)
-    v += fastrand() % 10;
-
-  return v % 2 == 0;
-}
-
 std::string getErrorDescription(std::error_code ec) noexcept {
   return (ec == std::errc::invalid_argument) ? "invalid_argument"
                                              : "unknown error";
@@ -39,7 +31,7 @@ public:
 
   bool match(std::string text) const noexcept {
     benchmark::DoNotOptimize(text);
-    return simulateSomeWork();
+    return (fastrand() % 10 > 4);
   }
 
   // helper function for benchmark
@@ -62,7 +54,7 @@ public:
 
   bool match(std::string text) const noexcept {
     benchmark::DoNotOptimize(text);
-    return simulateSomeWork();
+    return (fastrand() % 10 > 4);
   }
 
   // helper function for benchmark
@@ -77,7 +69,7 @@ int GlobPattern::SuccessRate;
 
 // -----------------------------------------------------------------------------
 
-std::error_code
+ATTRIBUTE_NOINLINE std::error_code
 OverheadExample_ErrorCode(bool &result, std::unique_ptr<std::string> &errorFileName) noexcept {
   GlobPatternEC pattern;
   std::string fileName = "[a*.txt";
@@ -100,7 +92,7 @@ void BM_SuccessRate_OverheadExample_ErrorCode(benchmark::State &state) {
     std::unique_ptr<std::string> errorFileName = nullptr; // only instantiate in error case
 
     if (std::error_code ec = OverheadExample_ErrorCode(res, errorFileName)) {
-      nulls << "[simpleExample Error] " << getErrorDescription(ec) << " ";
+      nulls << "[OverheadExample] " << getErrorDescription(ec) << " ";
       nulls << *errorFileName << "\n";
     }
 
@@ -110,7 +102,7 @@ void BM_SuccessRate_OverheadExample_ErrorCode(benchmark::State &state) {
 
 // -----------------------------------------------------------------------------
 
-Expected<bool> OverheadExample_Expected() noexcept {
+ATTRIBUTE_NOINLINE Expected<bool> OverheadExample_Expected() noexcept {
   std::string fileName = "[a*.txt";
 
   Expected<GlobPattern> pattern = GlobPattern::create(std::move(fileName));
@@ -127,7 +119,7 @@ void BM_SuccessRate_OverheadExample_Expected(benchmark::State &state) {
   while (state.KeepRunning()) {
     Expected<bool> res = OverheadExample_Expected();
     if (auto err = res.takeError()) {
-      logAllUnhandledErrors(std::move(err), nulls, "[simpleExample Error] ");
+      logAllUnhandledErrors(std::move(err), nulls, "[OverheadExample] ");
     }
 
     benchmark::DoNotOptimize(res);

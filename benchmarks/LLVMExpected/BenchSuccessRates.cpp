@@ -18,10 +18,6 @@ std::error_code Minimal_ErrorCode(int successRate, int &res) noexcept {
   return std::error_code();
 }
 
-ATTRIBUTE_NOINLINE void SOMETHING(int a) {
-    benchmark::DoNotOptimize(a);
-}
-
 void BM_SuccessRate_Minimal_ErrorCode(benchmark::State &state) {
   int successRate = state.range(0);
 
@@ -30,7 +26,7 @@ void BM_SuccessRate_Minimal_ErrorCode(benchmark::State &state) {
     auto ec = Minimal_ErrorCode(successRate, res);
 
     benchmark::DoNotOptimize(ec);
-    SOMETHING(res);
+    benchmark::DoNotOptimize(res);
   }
 }
 
@@ -45,27 +41,17 @@ llvm::Expected<int> Minimal_Expected(int successRate) noexcept {
   return successRate;
 }
 
-ATTRIBUTE_NOINLINE void SOMETHING_THEN(int a) {
-  benchmark::DoNotOptimize(a);
-}
-
-ATTRIBUTE_NOINLINE void SOMETHING_ELSE(llvm::Error a) {
-  llvm::consumeError(std::move(a));
-  benchmark::DoNotOptimize(a);
-}
-
 void BM_SuccessRate_Minimal_Expected(benchmark::State &state) {
   int successRate = state.range(0);
 
   while (state.KeepRunning()) {
     auto res = Minimal_Expected(successRate);
 
-    if (auto err = res.takeError()) {
-      SOMETHING_THEN(*res);
-    }
-    else {
-      SOMETHING_ELSE(std::move(err));
-    }
+#ifdef NDEBUG
+    benchmark::DoNotOptimize(res);
+#else
+    llvm::consumeError(res.takeError());
+#endif
   }
 }
 

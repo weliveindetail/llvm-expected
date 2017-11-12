@@ -2,18 +2,11 @@
 
 #include <benchmark/benchmark.h>
 
+#include <sstream>
 #include <stdexcept>
 
 // -----------------------------------------------------------------------------
 // helpers
-
-bool simulateSomeWork() noexcept {
-  int v = 0;
-  for (int i = 0; i < 1; i++)
-    v += fastrand() % 10;
-
-  return v % 2 == 0;
-}
 
 class GlobPattern {
 public:
@@ -26,7 +19,7 @@ public:
 
   bool match(std::string text) const noexcept {
     benchmark::DoNotOptimize(text);
-    return simulateSomeWork();
+    return (fastrand() % 10 > 4);
   }
 
   // helper function for benchmark
@@ -40,7 +33,7 @@ int GlobPattern::SuccessRate;
 
 // -----------------------------------------------------------------------------
 
-bool OverheadExample_ThrowException() {
+ATTRIBUTE_NOINLINE bool OverheadExample_ThrowException() {
   std::string fileName = "[a*.txt";
 
   GlobPattern pattern = GlobPattern::create(std::move(fileName));
@@ -48,17 +41,15 @@ bool OverheadExample_ThrowException() {
 }
 
 void BM_SuccessRate_OverheadExample_ThrowException(benchmark::State &state) {
-  GlobPattern::setSuccessRate(state.range(0));
+  std::ostringstream nulls;
 
   while (state.KeepRunning()) {
     bool res;
-    std::exception err;
     try {
       res = OverheadExample_ThrowException();
     } catch (std::runtime_error e) {
-      err = std::move(e);
+      nulls << "[OverheadExample] " << e.what() << "\n";
     }
-    benchmark::DoNotOptimize(err);
     benchmark::DoNotOptimize(res);
   }
 }

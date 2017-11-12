@@ -2,12 +2,13 @@
 
 #include <benchmark/benchmark.h>
 
+#include <sstream>
 #include <stdexcept>
 
 // -----------------------------------------------------------------------------
 
 ATTRIBUTE_NOINLINE
-int Minimal_ThrowInt(int successRate) {
+static int Minimal_ThrowInt(int successRate) {
   if (fastrand() % 100 > successRate)
     throw successRate;
 
@@ -15,17 +16,16 @@ int Minimal_ThrowInt(int successRate) {
 }
 
 void BM_SuccessRate_Minimal_ThrowInt(benchmark::State &state) {
+  std::ostringstream nulls;
   int successRate = state.range(0);
 
   while (state.KeepRunning()) {
     int res;
-    int err;
     try {
       res = Minimal_ThrowInt(successRate);
     } catch (int e) {
-      err = e;
+      nulls << "[OverheadExample] " << e << "\n";
     }
-    benchmark::DoNotOptimize(err);
     benchmark::DoNotOptimize(res);
   }
 }
@@ -33,7 +33,7 @@ void BM_SuccessRate_Minimal_ThrowInt(benchmark::State &state) {
 // -----------------------------------------------------------------------------
 
 ATTRIBUTE_NOINLINE
-int Minimal_ThrowException(int successRate) {
+static int Minimal_ThrowException(int successRate) {
   if (fastrand() % 100 > successRate)
     throw std::runtime_error("Mocked Error");
 
@@ -41,17 +41,16 @@ int Minimal_ThrowException(int successRate) {
 }
 
 void BM_SuccessRate_Minimal_ThrowException(benchmark::State &state) {
+  std::ostringstream nulls;
   int successRate = state.range(0);
 
   while (state.KeepRunning()) {
     int res;
-    std::exception err;
     try {
       res = Minimal_ThrowException(successRate);
     } catch (std::runtime_error e) {
-      err = std::move(e);
+      nulls << "[OverheadExample] " << e.what() << "\n";
     }
-    benchmark::DoNotOptimize(err);
     benchmark::DoNotOptimize(res);
   }
 }

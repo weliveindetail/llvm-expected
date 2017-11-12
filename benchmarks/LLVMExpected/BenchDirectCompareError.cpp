@@ -11,7 +11,6 @@ using namespace llvm;
 
 template <int N>
 ATTRIBUTE_NOINLINE Error DC_ErrorSuccess_Fwd(int gt10) noexcept {
-  benchmark::DoNotOptimize(gt10);
   return DC_ErrorSuccess_Fwd<N - 1>(gt10);
 }
 
@@ -41,7 +40,6 @@ void BM_DirectCompareError_ErrorSuccess_Fwd(benchmark::State &state) {
 template <int N>
 ATTRIBUTE_NOINLINE std::error_code
 DC_ErrorCodeSuccess_Fwd(int gt10) noexcept {
-  benchmark::DoNotOptimize(gt10);
   return DC_ErrorCodeSuccess_Fwd<N - 1>(gt10);
 }
 
@@ -70,7 +68,6 @@ void BM_DirectCompareError_ErrorCodeSuccess_Fwd(benchmark::State &state) {
 
 template <int N>
 ATTRIBUTE_NOINLINE int DC_AdHocSuccess_Fwd(int gt10) noexcept {
-  benchmark::DoNotOptimize(gt10);
   return DC_AdHocSuccess_Fwd<N - 1>(gt10);
 }
 

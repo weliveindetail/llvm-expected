@@ -11,7 +11,6 @@ using namespace llvm;
 
 template <int N>
 ATTRIBUTE_NOINLINE Expected<int> DC_ExpectedSuccess_Fwd(int gt10) noexcept {
-  benchmark::DoNotOptimize(gt10);
   return DC_ExpectedSuccess_Fwd<N - 1>(gt10);
 }
 
