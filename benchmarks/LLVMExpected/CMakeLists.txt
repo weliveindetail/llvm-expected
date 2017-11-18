@@ -11,12 +11,16 @@ add_executable(BenchmarkLLVMExpected
     forwarding/FwdIntAdHoc.cpp
     forwarding/FwdIntErrorCode.cpp
     forwarding/FwdIntExpected.cpp
+    forwarding/FwdIntOutcome.cpp
 
     forwarding/FwdVoidAdHoc.cpp
     forwarding/FwdVoidError.cpp
     forwarding/FwdVoidErrorCode.cpp
+    forwarding/FwdVoidOutcome.cpp
 
     FastRand.h
+
+    ../outcome/include/outcome.hpp
 )
 
 # use static runtime libraries for MSVC builds
@@ -34,6 +38,8 @@ endif()
 
 target_include_directories(BenchmarkLLVMExpected PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}
+    ${CMAKE_CURRENT_SOURCE_DIR}/..
+    ${CMAKE_CURRENT_SOURCE_DIR}/../outcome/include
 )
 
 target_compile_options(BenchmarkException PRIVATE

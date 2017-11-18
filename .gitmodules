@@ -6,3 +6,9 @@
 	path = benchmarks/benchmark
 	url = https://github.com/google/benchmark.git
 	branch = master
+[submodule "benchmarks/outcome"]
+	path = benchmarks/outcome
+	url = https://github.com/ned14/outcome.git
+[submodule "benchmarks/quickcpplib"]
+	path = benchmarks/quickcpplib
+	url = https://github.com/ned14/quickcpplib.git
