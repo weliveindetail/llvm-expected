@@ -4,11 +4,17 @@ add_executable(BenchmarkLLVMExpected
     BenchmarkLLVMExpected.cpp
 
     BenchSuccessRates.cpp
-    BenchDirectCompareError.cpp
-    BenchDirectCompareExpected.cpp
     BenchOverheadExample.cpp
     BenchOptimizations.cpp
     BenchPerfCategories.cpp
+
+    forwarding/FwdIntAdHoc.cpp
+    forwarding/FwdIntErrorCode.cpp
+    forwarding/FwdIntExpected.cpp
+
+    forwarding/FwdVoidAdHoc.cpp
+    forwarding/FwdVoidError.cpp
+    forwarding/FwdVoidErrorCode.cpp
 
     FastRand.h
 )
