@@ -30,6 +30,13 @@ target_include_directories(BenchmarkLLVMExpected PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
+target_compile_options(BenchmarkException PRIVATE
+    ${DISABLE_RTTI_FLAG}
+    ${DISABLE_EXCEPTIONS_FLAG}
+    ${DISABLE_STACKPROTECTOR_FLAG}
+    ${DISABLE_FRAMEPOINTER_FLAG}
+)
+
 target_link_libraries(BenchmarkLLVMExpected PRIVATE
     LLVMExpected
     benchmark

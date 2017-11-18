@@ -61,8 +61,11 @@ target_include_directories(LLVMExpected PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
 
-target_compile_options(LLVMExpected PUBLIC 
-	${USE_CXX_STANDARD_14}
+target_compile_options(LLVMExpected
+  PUBLIC
+    ${USE_CXX_STANDARD_14}
+
+  PRIVATE
     ${DISABLE_RTTI_FLAG}
     ${DISABLE_EXCEPTIONS_FLAG}
     ${DISABLE_STACKPROTECTOR_FLAG}

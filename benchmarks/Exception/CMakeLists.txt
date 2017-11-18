@@ -16,7 +16,7 @@ target_include_directories(BenchmarkException PRIVATE
 # This target doesn't link the LLVMExpected library 
 # and so it won't inherit any compiler options.
 target_compile_options(BenchmarkException PRIVATE 
-	${USE_CXX_STANDARD_14}
+    ${USE_CXX_STANDARD_14}
     ${ENABLE_RTTI_FLAG}
     ${ENABLE_EXCEPTIONS_FLAG}
     ${DISABLE_STACKPROTECTOR_FLAG}
