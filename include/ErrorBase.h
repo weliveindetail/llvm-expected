@@ -506,8 +506,12 @@ private:
   }
 
   ErrorInfoBase *getPtr() const {
+#ifndef NDEBUG
     return reinterpret_cast<ErrorInfoBase *>(
         reinterpret_cast<uintptr_t>(Payload) & ~static_cast<uintptr_t>(0x1));
+#else
+    return Payload;
+#endif
   }
 
   void setPtr(ErrorInfoBase *EI) {
@@ -529,9 +533,13 @@ private:
   }
 
   void setChecked(bool V) {
+#ifndef NDEBUG
     Payload = reinterpret_cast<ErrorInfoBase *>(
         (reinterpret_cast<uintptr_t>(Payload) & ~static_cast<uintptr_t>(0x1)) |
         (V ? 0 : 1));
+#else
+    (void)V;
+#endif
   }
 
   std::unique_ptr<ErrorInfoBase> takePayload() {
