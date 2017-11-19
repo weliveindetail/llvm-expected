@@ -48,6 +48,11 @@ target_include_directories(TestLLVMExpected PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
+target_compile_options(TestLLVMExpected PRIVATE
+    ${DISABLE_RTTI_FLAG}
+    ${DISABLE_EXCEPTIONS_FLAG}
+)
+
 target_link_libraries(TestLLVMExpected PRIVATE
     LLVMExpected
     gtest

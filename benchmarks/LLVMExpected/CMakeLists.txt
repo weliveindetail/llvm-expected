@@ -42,7 +42,7 @@ target_include_directories(BenchmarkLLVMExpected PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/../outcome/include
 )
 
-target_compile_options(BenchmarkException PRIVATE
+target_compile_options(BenchmarkLLVMExpected PRIVATE
     ${DISABLE_RTTI_FLAG}
     ${DISABLE_EXCEPTIONS_FLAG}
     ${DISABLE_STACKPROTECTOR_FLAG}
