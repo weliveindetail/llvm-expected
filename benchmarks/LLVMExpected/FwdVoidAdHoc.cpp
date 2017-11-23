@@ -3,6 +3,8 @@
 #include <benchmark/benchmark.h>
 #include <sstream>
 
+namespace FwdVoidAdHoc {
+
 template <int N>
 ATTRIBUTE_NOINLINE int IMPL_FwdVoidAdHoc(int gt10) noexcept {
   return IMPL_FwdVoidAdHoc<N - 1>(gt10);
@@ -32,3 +34,5 @@ BENCHMARK_TEMPLATE1(BM_FwdVoidAdHoc, 0);
 BENCHMARK_TEMPLATE1(BM_FwdVoidAdHoc, 2);
 BENCHMARK_TEMPLATE1(BM_FwdVoidAdHoc, 8);
 BENCHMARK_TEMPLATE1(BM_FwdVoidAdHoc, 16);
+
+}

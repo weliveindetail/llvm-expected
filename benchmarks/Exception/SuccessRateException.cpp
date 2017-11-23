@@ -4,6 +4,8 @@
 #include <sstream>
 #include <stdexcept>
 
+namespace SuccessRateException {
+
 ATTRIBUTE_NOINLINE
 static int IMPL_SuccessRateException(int successRate) {
   if (fastrand() % 100 > successRate)
@@ -30,3 +32,5 @@ void BM_SuccessRateException(benchmark::State &state) {
 }
 
 BENCHMARK(BM_SuccessRateException)->Arg(100)->Arg(95)->Arg(50)->Arg(0);
+
+}

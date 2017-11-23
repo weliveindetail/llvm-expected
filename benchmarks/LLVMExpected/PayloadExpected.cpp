@@ -6,6 +6,8 @@
 
 using namespace llvm;
 
+namespace PayloadExpected {
+
 class GlobPattern {
 public:
   GlobPattern() noexcept {
@@ -68,3 +70,5 @@ BENCHMARK_TEMPLATE1(BM_PayloadExpected, 0);
 BENCHMARK_TEMPLATE1(BM_PayloadExpected, 2);
 BENCHMARK_TEMPLATE1(BM_PayloadExpected, 8);
 BENCHMARK_TEMPLATE1(BM_PayloadExpected, 16);
+
+}

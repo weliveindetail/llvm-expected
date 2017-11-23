@@ -4,6 +4,8 @@
 #include <sstream>
 #include <system_error>
 
+namespace FwdIntErrorCode {
+
 template <int N>
 ATTRIBUTE_NOINLINE std::error_code
 IMPL_FwdIntErrorCode(int gt10, int &res) noexcept {
@@ -40,3 +42,5 @@ BENCHMARK_TEMPLATE1(BM_FwdIntErrorCode, 0);
 BENCHMARK_TEMPLATE1(BM_FwdIntErrorCode, 2);
 BENCHMARK_TEMPLATE1(BM_FwdIntErrorCode, 8);
 BENCHMARK_TEMPLATE1(BM_FwdIntErrorCode, 16);
+
+}

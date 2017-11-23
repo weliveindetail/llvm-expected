@@ -7,6 +7,8 @@
 
 namespace outcome = OUTCOME_V2_NAMESPACE;
 
+namespace PayloadOutcome {
+
 class GlobPattern {
 public:
   GlobPattern() noexcept {
@@ -70,3 +72,5 @@ BENCHMARK_TEMPLATE1(BM_PayloadOutcome, 0);
 BENCHMARK_TEMPLATE1(BM_PayloadOutcome, 2);
 BENCHMARK_TEMPLATE1(BM_PayloadOutcome, 8);
 BENCHMARK_TEMPLATE1(BM_PayloadOutcome, 16);
+
+}

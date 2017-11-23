@@ -4,6 +4,8 @@
 #include <sstream>
 #include <stdexcept>
 
+namespace PayloadException {
+
 class GlobPattern {
 public:
   GlobPattern() noexcept {
@@ -65,3 +67,5 @@ BENCHMARK_TEMPLATE1(BM_PayloadException, 0);
 BENCHMARK_TEMPLATE1(BM_PayloadException, 8);
 BENCHMARK_TEMPLATE1(BM_PayloadException, 16);
 BENCHMARK_TEMPLATE1(BM_PayloadException, 32);
+
+}

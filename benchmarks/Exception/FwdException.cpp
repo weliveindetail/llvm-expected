@@ -4,6 +4,8 @@
 #include <sstream>
 #include <stdexcept>
 
+namespace FwdException {
+
 template <int N>
 ATTRIBUTE_NOINLINE void IMPL_FwdException(int gt10) {
   return IMPL_FwdException<N - 1>(gt10);
@@ -35,3 +37,5 @@ BENCHMARK_TEMPLATE1(BM_FwdException, 0);
 BENCHMARK_TEMPLATE1(BM_FwdException, 8);
 BENCHMARK_TEMPLATE1(BM_FwdException, 16);
 BENCHMARK_TEMPLATE1(BM_FwdException, 32);
+
+}

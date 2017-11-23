@@ -7,6 +7,8 @@
 
 namespace outcome = OUTCOME_V2_NAMESPACE;
 
+namespace FwdVoidOutcome {
+
 template <int N>
 ATTRIBUTE_NOINLINE outcome::result<void, std::string>
 IMPL_FwdVoidOutcome(int gt10) noexcept {
@@ -40,3 +42,5 @@ BENCHMARK_TEMPLATE1(BM_FwdVoidOutcome, 0);
 BENCHMARK_TEMPLATE1(BM_FwdVoidOutcome, 2);
 BENCHMARK_TEMPLATE1(BM_FwdVoidOutcome, 8);
 BENCHMARK_TEMPLATE1(BM_FwdVoidOutcome, 16);
+
+}

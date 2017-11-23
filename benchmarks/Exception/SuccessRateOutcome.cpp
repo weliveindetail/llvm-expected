@@ -7,6 +7,8 @@
 
 namespace outcome = OUTCOME_V2_NAMESPACE;
 
+namespace SuccessRateOutcome {
+
 ATTRIBUTE_NOINLINE
 outcome::result<int>
 IMPL_SuccessRateOutcome(int successRate) noexcept {
@@ -34,3 +36,5 @@ void BM_SuccessRateOutcome(benchmark::State &state) {
 // -----------------------------------------------------------------------------
 
 BENCHMARK(BM_SuccessRateOutcome)->Arg(100)->Arg(95)->Arg(50)->Arg(0);
+
+}

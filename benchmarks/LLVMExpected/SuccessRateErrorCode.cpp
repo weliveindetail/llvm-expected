@@ -4,6 +4,8 @@
 #include <sstream>
 #include <system_error>
 
+namespace SuccessRateErrorCode {
+
 ATTRIBUTE_NOINLINE
 std::error_code IMPL_SuccessRateErrorCode(int successRate, int &res) noexcept {
   if (fastrand() % 100 > successRate)
@@ -29,3 +31,5 @@ void BM_SuccessRateErrorCode(benchmark::State &state) {
 }
 
 BENCHMARK(BM_SuccessRateErrorCode)->Arg(100)->Arg(95)->Arg(50)->Arg(0);
+
+}

@@ -6,6 +6,8 @@
 
 using namespace llvm;
 
+namespace FwdIntExpected {
+
 template <int N>
 ATTRIBUTE_NOINLINE Expected<int> IMPL_FwdIntExpected(int gt10) noexcept {
   return IMPL_FwdIntExpected<N - 1>(gt10);
@@ -38,3 +40,5 @@ BENCHMARK_TEMPLATE1(BM_FwdIntExpected, 0);
 BENCHMARK_TEMPLATE1(BM_FwdIntExpected, 2);
 BENCHMARK_TEMPLATE1(BM_FwdIntExpected, 8);
 BENCHMARK_TEMPLATE1(BM_FwdIntExpected, 16);
+
+}

@@ -3,6 +3,8 @@
 #include <benchmark/benchmark.h>
 #include <sstream>
 
+namespace PayloadAdHoc {
+
 class GlobPattern {
 public:
   GlobPattern() noexcept {
@@ -70,3 +72,5 @@ BENCHMARK_TEMPLATE1(BM_PayloadAdHoc, 0);
 BENCHMARK_TEMPLATE1(BM_PayloadAdHoc, 2);
 BENCHMARK_TEMPLATE1(BM_PayloadAdHoc, 8);
 BENCHMARK_TEMPLATE1(BM_PayloadAdHoc, 16);
+
+}

@@ -7,6 +7,8 @@
 
 using namespace llvm;
 
+namespace SuccessRateExpected {
+
 ATTRIBUTE_NOINLINE
 Expected<int> IMPL_SuccessRateExpected(int successRate) noexcept {
   if (fastrand() % 100 > successRate)
@@ -30,6 +32,6 @@ void BM_SuccessRateExpected(benchmark::State &state) {
   }
 }
 
-// -----------------------------------------------------------------------------
-
 BENCHMARK(BM_SuccessRateExpected)->Arg(100)->Arg(95)->Arg(50)->Arg(0);
+
+}

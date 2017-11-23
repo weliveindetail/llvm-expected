@@ -3,6 +3,8 @@
 #include <benchmark/benchmark.h>
 #include <sstream>
 
+namespace SuccessRateAdHoc {
+
 ATTRIBUTE_NOINLINE
 int IMPL_SuccessRateAdHoc(int successRate, int &res) noexcept {
   if (fastrand() % 100 > successRate)
@@ -28,3 +30,5 @@ void BM_SuccessRateAdHoc(benchmark::State &state) {
 }
 
 BENCHMARK(BM_SuccessRateAdHoc)->Arg(100)->Arg(95)->Arg(50)->Arg(0);
+
+}

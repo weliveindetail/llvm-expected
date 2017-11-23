@@ -6,6 +6,8 @@
 
 using namespace llvm;
 
+namespace FwdVoidError {
+
 template <int N>
 ATTRIBUTE_NOINLINE Error IMPL_FwdVoidError(int gt10) noexcept {
   return IMPL_FwdVoidError<N - 1>(gt10);
@@ -36,3 +38,5 @@ BENCHMARK_TEMPLATE1(BM_FwdVoidError, 0);
 BENCHMARK_TEMPLATE1(BM_FwdVoidError, 2);
 BENCHMARK_TEMPLATE1(BM_FwdVoidError, 8);
 BENCHMARK_TEMPLATE1(BM_FwdVoidError, 16);
+
+}
