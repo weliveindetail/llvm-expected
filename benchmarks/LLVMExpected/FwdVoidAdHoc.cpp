@@ -1,11 +1,7 @@
 #include "FastRand.h"
 
-#include <Errors.h>
-#include <Expected.h>
-
 #include <benchmark/benchmark.h>
-
-using namespace llvm;
+#include <sstream>
 
 template <int N>
 ATTRIBUTE_NOINLINE int IMPL_FwdVoidAdHoc(int gt10) noexcept {

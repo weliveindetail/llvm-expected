@@ -1,8 +1,7 @@
- #include "FastRand.h"
+#include "FastRand.h"
 
 #include <Errors.h>
 #include <Expected.h>
-
 #include <benchmark/benchmark.h>
 
 using namespace llvm;

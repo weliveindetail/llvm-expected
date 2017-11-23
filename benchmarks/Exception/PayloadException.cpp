@@ -1,12 +1,8 @@
 #include "FastRand.h"
 
 #include <benchmark/benchmark.h>
-
 #include <sstream>
 #include <stdexcept>
-
-// -----------------------------------------------------------------------------
-// helpers
 
 class GlobPattern {
 public:
@@ -14,6 +10,7 @@ public:
     Gt10 = fastrand() % 10 + 100;
   }
 
+  ATTRIBUTE_NOINLINE
   static GlobPattern create(std::string input) {
     if (fastrand() % 10 > Gt10)
       throw std::runtime_error("invalid glob pattern: " + input);
@@ -32,15 +29,15 @@ private:
 
 int GlobPattern::Gt10;
 
-// -----------------------------------------------------------------------------
-
 template <int N>
-ATTRIBUTE_NOINLINE bool OverheadExample_ThrowException_Fwd() {
-  return OverheadExample_ThrowException_Fwd<N - 1>();
+ATTRIBUTE_NOINLINE
+bool IMPL_PayloadException() {
+  return IMPL_PayloadException<N - 1>();
 }
 
 template <>
-ATTRIBUTE_NOINLINE bool OverheadExample_ThrowException_Fwd<0>() {
+ATTRIBUTE_NOINLINE
+bool IMPL_PayloadException<0>() {
   std::string fileName = "[a*.txt";
 
   GlobPattern pattern = GlobPattern::create(std::move(fileName));
@@ -48,23 +45,23 @@ ATTRIBUTE_NOINLINE bool OverheadExample_ThrowException_Fwd<0>() {
 }
 
 template <int N>
-void BM_OverheadExample_ThrowException_Fwd(benchmark::State &state) {
+void BM_PayloadException(benchmark::State &state) {
   std::ostringstream nulls;
 
   while (state.KeepRunning()) {
     bool res;
+
     try {
-      res = OverheadExample_ThrowException_Fwd<N>();
+      res = IMPL_PayloadException<N>();
     } catch (std::runtime_error e) {
       nulls << "[OverheadExample] " << e.what() << "\n";
     }
+
     benchmark::DoNotOptimize(res);
   }
 }
 
-// -----------------------------------------------------------------------------
-
-BENCHMARK_TEMPLATE1(BM_OverheadExample_ThrowException_Fwd, 0);
-BENCHMARK_TEMPLATE1(BM_OverheadExample_ThrowException_Fwd, 8);
-BENCHMARK_TEMPLATE1(BM_OverheadExample_ThrowException_Fwd, 16);
-BENCHMARK_TEMPLATE1(BM_OverheadExample_ThrowException_Fwd, 64);
+BENCHMARK_TEMPLATE1(BM_PayloadException, 0);
+BENCHMARK_TEMPLATE1(BM_PayloadException, 8);
+BENCHMARK_TEMPLATE1(BM_PayloadException, 16);
+BENCHMARK_TEMPLATE1(BM_PayloadException, 32);

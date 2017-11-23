@@ -3,14 +3,23 @@ cmake_minimum_required(VERSION 3.2)
 add_executable(BenchmarkException
     BenchmarkException.cpp
 
-    BenchOverheadExample.cpp
-    BenchSuccessRates.cpp
+    FwdException.cpp
+    FwdIntOutcome.cpp
+    FwdVoidOutcome.cpp
+
+    PayloadException.cpp
+    PayloadOutcome.cpp
+
+    SuccessRateException.cpp
+    SuccessRateOutcome.cpp
 
     FastRand.h
 )
 
 target_include_directories(BenchmarkException PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}
+    ${CMAKE_CURRENT_SOURCE_DIR}/..
+    ${CMAKE_CURRENT_SOURCE_DIR}/../outcome/include
 )
 
 # This target doesn't link the LLVMExpected library 

@@ -3,24 +3,23 @@ cmake_minimum_required(VERSION 3.2)
 add_executable(BenchmarkLLVMExpected
     BenchmarkLLVMExpected.cpp
 
-    BenchSuccessRates.cpp
-    BenchOverheadExample.cpp
-    BenchOptimizations.cpp
-    BenchPerfCategories.cpp
+    FwdIntAdHoc.cpp
+    FwdIntErrorCode.cpp
+    FwdIntExpected.cpp
 
-    forwarding/FwdIntAdHoc.cpp
-    forwarding/FwdIntErrorCode.cpp
-    forwarding/FwdIntExpected.cpp
-    forwarding/FwdIntOutcome.cpp
+    FwdVoidAdHoc.cpp
+    FwdVoidError.cpp
+    FwdVoidErrorCode.cpp
 
-    forwarding/FwdVoidAdHoc.cpp
-    forwarding/FwdVoidError.cpp
-    forwarding/FwdVoidErrorCode.cpp
-    forwarding/FwdVoidOutcome.cpp
+    PayloadAdHoc.cpp
+    PayloadErrorCode.cpp
+    PayloadExpected.cpp
+
+    SuccessRateAdHoc.cpp
+    SuccessRateErrorCode.cpp
+    SuccessRateExpected.cpp
 
     FastRand.h
-
-    ../outcome/include/outcome.hpp
 )
 
 # use static runtime libraries for MSVC builds
@@ -38,8 +37,6 @@ endif()
 
 target_include_directories(BenchmarkLLVMExpected PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}
-    ${CMAKE_CURRENT_SOURCE_DIR}/..
-    ${CMAKE_CURRENT_SOURCE_DIR}/../outcome/include
 )
 
 target_compile_options(BenchmarkLLVMExpected PRIVATE

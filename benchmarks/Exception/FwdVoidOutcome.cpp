@@ -1,4 +1,5 @@
 #include "FastRand.h"
+
 #include <outcome/outcome.hpp>
 #include <benchmark/benchmark.h>
 #include <string>
