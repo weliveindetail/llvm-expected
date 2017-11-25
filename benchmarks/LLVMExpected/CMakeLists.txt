@@ -19,7 +19,8 @@ add_executable(BenchmarkLLVMExpected
     SuccessRateErrorCode.cpp
     SuccessRateExpected.cpp
 
-    FastRand.h
+    ../common/Compiler.h
+    ../common/FastRand.h
 )
 
 # use static runtime libraries for MSVC builds

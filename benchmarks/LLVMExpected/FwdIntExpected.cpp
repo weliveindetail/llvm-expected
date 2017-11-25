@@ -1,4 +1,5 @@
-#include "FastRand.h"
+#include "common/Compiler.h"
+#include "common/FastRand.h"
 
 #include <Errors.h>
 #include <Expected.h>

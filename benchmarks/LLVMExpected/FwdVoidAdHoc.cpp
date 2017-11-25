@@ -1,4 +1,5 @@
-#include "FastRand.h"
+#include "common/Compiler.h"
+#include "common/FastRand.h"
 
 #include <benchmark/benchmark.h>
 #include <sstream>

@@ -13,7 +13,8 @@ add_executable(BenchmarkException
     SuccessRateException.cpp
     SuccessRateOutcome.cpp
 
-    FastRand.h
+    ../common/Compiler.h
+    ../common/FastRand.h
 )
 
 target_include_directories(BenchmarkException PRIVATE
