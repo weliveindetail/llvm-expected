@@ -1,11 +1,13 @@
 #include "common/Compiler.h"
 #include "common/FastRand.h"
+#include "common/outcome.hpp"
 #include "common/WorkloadSim.h"
 
-#include <outcome/outcome.hpp>
 #include <benchmark/benchmark.h>
-#include <string>
 #include <sstream>
+#include <string>
+
+#if ENABLE_BENCHMARK_OUTCOME
 
 namespace outcome = OUTCOME_V2_NAMESPACE;
 
@@ -54,3 +56,5 @@ BENCHMARK_TEMPLATE1(BM_FwdVoidOutcome, 4);
 BENCHMARK_TEMPLATE1(BM_FwdVoidOutcome, 8);
 
 }
+
+#endif

@@ -1,10 +1,12 @@
 #include "common/Compiler.h"
 #include "common/FastRand.h"
+#include "common/outcome.hpp"
 
-#include <outcome.hpp>
 #include <benchmark/benchmark.h>
 #include <sstream>
 #include <string>
+
+#if ENABLE_BENCHMARK_OUTCOME
 
 namespace outcome = OUTCOME_V2_NAMESPACE;
 
@@ -39,3 +41,5 @@ void BM_SuccessRateOutcome(benchmark::State &state) {
 BENCHMARK(BM_SuccessRateOutcome)->Arg(100)->Arg(95)->Arg(50)->Arg(0);
 
 }
+
+#endif

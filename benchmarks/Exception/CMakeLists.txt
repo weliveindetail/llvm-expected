@@ -19,12 +19,13 @@ add_executable(BenchmarkException
     ../common/FastRand.h
     ../common/WorkloadSim.h
     ../common/WorkloadSimBench.cpp
+
+    ../common/outcome.hpp
 )
 
 target_include_directories(BenchmarkException PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}/..
-    ${CMAKE_CURRENT_SOURCE_DIR}/../outcome/include
 )
 
 # This target doesn't link the LLVMExpected library 
