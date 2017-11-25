@@ -21,6 +21,8 @@ add_executable(BenchmarkLLVMExpected
 
     ../common/Compiler.h
     ../common/FastRand.h
+    ../common/WorkloadSim.h
+    ../common/WorkloadSimBench.cpp
 )
 
 # use static runtime libraries for MSVC builds

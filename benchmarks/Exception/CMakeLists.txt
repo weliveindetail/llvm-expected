@@ -15,6 +15,8 @@ add_executable(BenchmarkException
 
     ../common/Compiler.h
     ../common/FastRand.h
+    ../common/WorkloadSim.h
+    ../common/WorkloadSimBench.cpp
 )
 
 target_include_directories(BenchmarkException PRIVATE
