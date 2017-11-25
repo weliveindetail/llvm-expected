@@ -1,6 +1,7 @@
 #include "FastRand.h"
 
 #include <benchmark/benchmark.h>
+#include <memory>
 #include <sstream>
 
 namespace PayloadAdHoc {
