@@ -17,16 +17,17 @@ addons:
 script:
     - export CC=gcc-7
     - export CXX=g++-7
+
     - mkdir build-test-debug
     - cd build-test-debug
     - cmake -DCMAKE_BUILD_TYPE=Debug -DLLVMEXPECTED_INCLUDE_TESTS=ON ..
     - cmake --build .
     - ./tests/TestLLVMExpected
     - cd ..
+
     - mkdir build-bench-release
     - cd build-bench-release
     - cmake -DCMAKE_BUILD_TYPE=Release -DLLVMEXPECTED_INCLUDE_BENCHMARKS=ON ..
     - cmake --build .
-    - ./benchmarks/LLVMExpected/BenchmarkLLVMExpected
-    - ./benchmarks/Exception/BenchmarkException
- 
+    - ./benchmarks/LLVMExpected/BenchmarkLLVMExpected --benchmark_repetitions=16 --benchmark_report_aggregates_only=true --benchmark_out=exceptions-x86_64-linux-gcc7.json
+    - ./benchmarks/Exception/BenchmarkException --benchmark_repetitions=16 --benchmark_report_aggregates_only=true --benchmark_out=noexceptions-x86_64-linux-gcc7.json
