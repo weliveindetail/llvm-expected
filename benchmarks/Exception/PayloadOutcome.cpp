@@ -44,7 +44,7 @@ outcome::result<bool, std::string> IMPL_PayloadOutcome() noexcept {
 
 template <>
 ATTRIBUTE_NOINLINE
-outcome::result<bool, std::string> IMPL_PayloadOutcome<0>() noexcept {
+outcome::result<bool, std::string> IMPL_PayloadOutcome<1>() noexcept {
   std::string fileName = "[a*.txt";
 
   auto pattern = GlobPattern::create(std::move(fileName));
@@ -69,9 +69,9 @@ void BM_PayloadOutcome(benchmark::State &state) {
   }
 }
 
-BENCHMARK_TEMPLATE1(BM_PayloadOutcome, 0);
+BENCHMARK_TEMPLATE1(BM_PayloadOutcome, 1);
 BENCHMARK_TEMPLATE1(BM_PayloadOutcome, 2);
+BENCHMARK_TEMPLATE1(BM_PayloadOutcome, 4);
 BENCHMARK_TEMPLATE1(BM_PayloadOutcome, 8);
-BENCHMARK_TEMPLATE1(BM_PayloadOutcome, 16);
 
 }

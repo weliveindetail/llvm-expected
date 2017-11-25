@@ -44,7 +44,7 @@ std::error_code IMPL_PayloadErrorCode(
 
 template <>
 ATTRIBUTE_NOINLINE
-std::error_code IMPL_PayloadErrorCode<0>(
+std::error_code IMPL_PayloadErrorCode<1>(
     bool &result, std::unique_ptr<std::string> &errorFileName) noexcept {
   GlobPattern pattern;
   std::string fileName = "[a*.txt";
@@ -75,9 +75,9 @@ void BM_PayloadErrorCode(benchmark::State &state) {
   }
 }
 
-BENCHMARK_TEMPLATE1(BM_PayloadErrorCode, 0);
+BENCHMARK_TEMPLATE1(BM_PayloadErrorCode, 1);
 BENCHMARK_TEMPLATE1(BM_PayloadErrorCode, 2);
+BENCHMARK_TEMPLATE1(BM_PayloadErrorCode, 4);
 BENCHMARK_TEMPLATE1(BM_PayloadErrorCode, 8);
-BENCHMARK_TEMPLATE1(BM_PayloadErrorCode, 16);
 
 }

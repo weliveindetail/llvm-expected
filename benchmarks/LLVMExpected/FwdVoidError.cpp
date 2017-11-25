@@ -15,7 +15,7 @@ ATTRIBUTE_NOINLINE Error IMPL_FwdVoidError(int gt10) noexcept {
 }
 
 template <>
-ATTRIBUTE_NOINLINE Error IMPL_FwdVoidError<0>(int gt10) noexcept {
+ATTRIBUTE_NOINLINE Error IMPL_FwdVoidError<1>(int gt10) noexcept {
   if (fastrand() % 10 > gt10) // never happens
     return llvm::make_error<llvm::StringError>(
         "Mocked Error", llvm::inconvertibleErrorCode());
@@ -35,9 +35,9 @@ void BM_FwdVoidError(benchmark::State &state) {
   }
 }
 
-BENCHMARK_TEMPLATE1(BM_FwdVoidError, 0);
+BENCHMARK_TEMPLATE1(BM_FwdVoidError, 1);
 BENCHMARK_TEMPLATE1(BM_FwdVoidError, 2);
+BENCHMARK_TEMPLATE1(BM_FwdVoidError, 4);
 BENCHMARK_TEMPLATE1(BM_FwdVoidError, 8);
-BENCHMARK_TEMPLATE1(BM_FwdVoidError, 16);
 
 }

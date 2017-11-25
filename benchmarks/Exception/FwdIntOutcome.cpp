@@ -18,7 +18,7 @@ IMPL_FwdIntOutcome(int gt10) noexcept {
 
 template <>
 ATTRIBUTE_NOINLINE outcome::result<int, std::string>
-IMPL_FwdIntOutcome<0>(int gt10) noexcept {
+IMPL_FwdIntOutcome<1>(int gt10) noexcept {
   if (fastrand() % 10 > gt10)
     return "Mocked Error";  // never happens
 
@@ -39,9 +39,9 @@ void BM_FwdIntOutcome(benchmark::State &state) {
   }
 }
 
-BENCHMARK_TEMPLATE1(BM_FwdIntOutcome, 0);
+BENCHMARK_TEMPLATE1(BM_FwdIntOutcome, 1);
 BENCHMARK_TEMPLATE1(BM_FwdIntOutcome, 2);
+BENCHMARK_TEMPLATE1(BM_FwdIntOutcome, 4);
 BENCHMARK_TEMPLATE1(BM_FwdIntOutcome, 8);
-BENCHMARK_TEMPLATE1(BM_FwdIntOutcome, 16);
 
 }

@@ -12,7 +12,7 @@ ATTRIBUTE_NOINLINE int IMPL_FwdVoidAdHoc(int gt10) noexcept {
 }
 
 template <>
-ATTRIBUTE_NOINLINE int IMPL_FwdVoidAdHoc<0>(int gt10) noexcept {
+ATTRIBUTE_NOINLINE int IMPL_FwdVoidAdHoc<1>(int gt10) noexcept {
   if (fastrand() % 10 > gt10)
     return 9;
 
@@ -31,9 +31,9 @@ void BM_FwdVoidAdHoc(benchmark::State &state) {
   }
 }
 
-BENCHMARK_TEMPLATE1(BM_FwdVoidAdHoc, 0);
+BENCHMARK_TEMPLATE1(BM_FwdVoidAdHoc, 1);
 BENCHMARK_TEMPLATE1(BM_FwdVoidAdHoc, 2);
+BENCHMARK_TEMPLATE1(BM_FwdVoidAdHoc, 4);
 BENCHMARK_TEMPLATE1(BM_FwdVoidAdHoc, 8);
-BENCHMARK_TEMPLATE1(BM_FwdVoidAdHoc, 16);
 
 }

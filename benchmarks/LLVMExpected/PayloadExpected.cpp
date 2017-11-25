@@ -42,7 +42,7 @@ ATTRIBUTE_NOINLINE Expected<bool> IMPL_PayloadExpected() noexcept {
 }
 
 template <>
-ATTRIBUTE_NOINLINE Expected<bool> IMPL_PayloadExpected<0>() noexcept {
+ATTRIBUTE_NOINLINE Expected<bool> IMPL_PayloadExpected<1>() noexcept {
   std::string fileName = "[a*.txt";
 
   Expected<GlobPattern> pattern = GlobPattern::create(std::move(fileName));
@@ -67,9 +67,9 @@ void BM_PayloadExpected(benchmark::State &state) {
   }
 }
 
-BENCHMARK_TEMPLATE1(BM_PayloadExpected, 0);
+BENCHMARK_TEMPLATE1(BM_PayloadExpected, 1);
 BENCHMARK_TEMPLATE1(BM_PayloadExpected, 2);
+BENCHMARK_TEMPLATE1(BM_PayloadExpected, 4);
 BENCHMARK_TEMPLATE1(BM_PayloadExpected, 8);
-BENCHMARK_TEMPLATE1(BM_PayloadExpected, 16);
 
 }

@@ -15,7 +15,7 @@ IMPL_FwdIntErrorCode(int gt10, int &res) noexcept {
 
 template<>
 ATTRIBUTE_NOINLINE std::error_code
-IMPL_FwdIntErrorCode<0>(int gt10, int &res) noexcept {
+IMPL_FwdIntErrorCode<1>(int gt10, int &res) noexcept {
   if (fastrand() % 10 > gt10)
     return std::error_code(9, std::system_category()); // never happens
 
@@ -39,9 +39,9 @@ void BM_FwdIntErrorCode(benchmark::State &state) {
   }
 }
 
-BENCHMARK_TEMPLATE1(BM_FwdIntErrorCode, 0);
+BENCHMARK_TEMPLATE1(BM_FwdIntErrorCode, 1);
 BENCHMARK_TEMPLATE1(BM_FwdIntErrorCode, 2);
+BENCHMARK_TEMPLATE1(BM_FwdIntErrorCode, 4);
 BENCHMARK_TEMPLATE1(BM_FwdIntErrorCode, 8);
-BENCHMARK_TEMPLATE1(BM_FwdIntErrorCode, 16);
 
 }

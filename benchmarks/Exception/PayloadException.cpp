@@ -40,7 +40,7 @@ bool IMPL_PayloadException() {
 
 template <>
 ATTRIBUTE_NOINLINE
-bool IMPL_PayloadException<0>() {
+bool IMPL_PayloadException<1>() {
   std::string fileName = "[a*.txt";
 
   GlobPattern pattern = GlobPattern::create(std::move(fileName));
@@ -64,9 +64,9 @@ void BM_PayloadException(benchmark::State &state) {
   }
 }
 
-BENCHMARK_TEMPLATE1(BM_PayloadException, 0);
+BENCHMARK_TEMPLATE1(BM_PayloadException, 1);
+BENCHMARK_TEMPLATE1(BM_PayloadException, 4);
 BENCHMARK_TEMPLATE1(BM_PayloadException, 8);
-BENCHMARK_TEMPLATE1(BM_PayloadException, 16);
 BENCHMARK_TEMPLATE1(BM_PayloadException, 32);
 
 }

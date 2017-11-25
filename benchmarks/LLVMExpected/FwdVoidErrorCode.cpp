@@ -13,7 +13,7 @@ ATTRIBUTE_NOINLINE std::error_code IMPL_FwdVoidErrorCode(int gt10) noexcept {
 }
 
 template <>
-ATTRIBUTE_NOINLINE std::error_code IMPL_FwdVoidErrorCode<0>(int gt10) noexcept {
+ATTRIBUTE_NOINLINE std::error_code IMPL_FwdVoidErrorCode<1>(int gt10) noexcept {
   if (fastrand() % 10 > gt10)
     return std::error_code(9, std::system_category());
 
@@ -32,9 +32,9 @@ void BM_FwdVoidErrorCode(benchmark::State &state) {
   }
 }
 
-BENCHMARK_TEMPLATE1(BM_FwdVoidErrorCode, 0);
+BENCHMARK_TEMPLATE1(BM_FwdVoidErrorCode, 1);
 BENCHMARK_TEMPLATE1(BM_FwdVoidErrorCode, 2);
+BENCHMARK_TEMPLATE1(BM_FwdVoidErrorCode, 4);
 BENCHMARK_TEMPLATE1(BM_FwdVoidErrorCode, 8);
-BENCHMARK_TEMPLATE1(BM_FwdVoidErrorCode, 16);
 
 }

@@ -40,7 +40,7 @@ ATTRIBUTE_NOINLINE bool IMPL_PayloadAdHoc(
 }
 
 template <>
-ATTRIBUTE_NOINLINE bool IMPL_PayloadAdHoc<0>(
+ATTRIBUTE_NOINLINE bool IMPL_PayloadAdHoc<1>(
     bool &result, std::unique_ptr<std::string> &errorFileName) noexcept {
   GlobPattern pattern;
   std::string fileName = "[a*.txt";
@@ -70,9 +70,9 @@ void BM_PayloadAdHoc(benchmark::State &state) {
   }
 }
 
-BENCHMARK_TEMPLATE1(BM_PayloadAdHoc, 0);
+BENCHMARK_TEMPLATE1(BM_PayloadAdHoc, 1);
 BENCHMARK_TEMPLATE1(BM_PayloadAdHoc, 2);
+BENCHMARK_TEMPLATE1(BM_PayloadAdHoc, 4);
 BENCHMARK_TEMPLATE1(BM_PayloadAdHoc, 8);
-BENCHMARK_TEMPLATE1(BM_PayloadAdHoc, 16);
 
 }

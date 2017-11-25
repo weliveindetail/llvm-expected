@@ -13,7 +13,7 @@ ATTRIBUTE_NOINLINE void IMPL_FwdException(int gt10) {
 }
 
 template <>
-ATTRIBUTE_NOINLINE void IMPL_FwdException<0>(int gt10) {
+ATTRIBUTE_NOINLINE void IMPL_FwdException<1>(int gt10) {
   if (fastrand() % 10 > gt10)
     throw std::runtime_error("some detail"); // never happens
 }
@@ -34,9 +34,9 @@ void BM_FwdException(benchmark::State &state) {
 
 // -----------------------------------------------------------------------------
 
-BENCHMARK_TEMPLATE1(BM_FwdException, 0);
+BENCHMARK_TEMPLATE1(BM_FwdException, 1);
+BENCHMARK_TEMPLATE1(BM_FwdException, 2);
+BENCHMARK_TEMPLATE1(BM_FwdException, 4);
 BENCHMARK_TEMPLATE1(BM_FwdException, 8);
-BENCHMARK_TEMPLATE1(BM_FwdException, 16);
-BENCHMARK_TEMPLATE1(BM_FwdException, 32);
 
 }
