@@ -3,8 +3,10 @@ cmake_minimum_required(VERSION 3.2)
 add_executable(BenchmarkException
     BenchmarkException.cpp
 
-    FwdException.cpp
+    FwdIntException.cpp
     FwdIntOutcome.cpp
+
+    FwdVoidException.cpp
     FwdVoidOutcome.cpp
 
     PayloadException.cpp

@@ -1,5 +1,6 @@
 #include "common/Compiler.h"
 #include "common/FastRand.h"
+#include "common/WorkloadSim.h"
 
 #include <outcome.hpp>
 #include <benchmark/benchmark.h>
@@ -13,29 +14,37 @@ namespace FwdIntOutcome {
 template <int N>
 ATTRIBUTE_NOINLINE outcome::result<int, std::string>
 IMPL_FwdIntOutcome(int gt10) noexcept {
-  return IMPL_FwdIntOutcome<N - 1>(gt10);
+  workload(gt10);
+
+  auto res = IMPL_FwdIntOutcome<N - 1>(gt10);
+  if (!res)
+    return res.error(); // never happens
+
+  return workload(res.value());
 }
 
 template <>
 ATTRIBUTE_NOINLINE outcome::result<int, std::string>
 IMPL_FwdIntOutcome<1>(int gt10) noexcept {
-  if (fastrand() % 10 > gt10)
-    return "Mocked Error";  // never happens
+  if (workload(gt10) < 10)
+    return "Error Message";  // never happens
 
-  return gt10 - fastrand() % 10;
+  return workload(gt10);
 }
 
 template <int N>
 void BM_FwdIntOutcome(benchmark::State &state) {
   std::ostringstream nulls;
+  int gt10 = fastrand() % 10 + 100;
 
   while (state.KeepRunning()) {
-    int gt10 = fastrand() % 10 + 100;
     auto res = IMPL_FwdIntOutcome<N>(gt10);
 
     if (!res) {
       nulls << "[never happens]" << res.error();
     }
+
+    benchmark::DoNotOptimize(res);
   }
 }
 

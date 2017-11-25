@@ -21,7 +21,6 @@ add_executable(BenchmarkLLVMExpected
 
     ../common/Compiler.h
     ../common/FastRand.h
-    ../common/WorkloadSim.h
     ../common/WorkloadSimBench.cpp
 )
 
@@ -40,6 +39,7 @@ endif()
 
 target_include_directories(BenchmarkLLVMExpected PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}
+    ${CMAKE_CURRENT_SOURCE_DIR}/..
 )
 
 target_compile_options(BenchmarkLLVMExpected PRIVATE
