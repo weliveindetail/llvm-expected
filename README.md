@@ -9,7 +9,7 @@ LLVM's Rich Recoverable Error Handling as a Library
 **Most of the code in this repository is not my own work**.
 I only extracted it from the LLVM libraries in order to make it reusable for 3rd-parties.
 The main developer of the error handling utilities is Lang Hames.
-Other original contributers include Eugene Zelenko, Mehdi Amini, Torok Edwin, Chris Lattner, 
+Other original contributors include Eugene Zelenko, Mehdi Amini, Torok Edwin, Chris Lattner, 
 Alisdair Meredith, Daniel Dunbar, Dan Gohman and Nakamura Takumi.
 
 ## Checkout
