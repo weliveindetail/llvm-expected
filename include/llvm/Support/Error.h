@@ -25,7 +25,6 @@
 #include "llvm/Support/ErrorHandling.h"
 #include "llvm/Support/ErrorOr.h"
 #include "llvm/Support/Format.h"
-#include "llvm/Support/ManagedStatic.h"
 #include "llvm/Support/raw_ostream.h"
 #include <algorithm>
 #include <cassert>
@@ -68,7 +67,7 @@ namespace {
   };
 }
 
-inline static llvm::ManagedStatic<ErrorErrorCategory> ErrorErrorCat;
+inline static const ErrorErrorCategory ErrorErrorCat;
   
 namespace llvm {
 
@@ -407,7 +406,7 @@ public:
 
   std::error_code convertToErrorCode() const override {
     return std::error_code(static_cast<int>(ErrorErrorCode::MultipleErrors),
-                           *ErrorErrorCat);
+                           ErrorErrorCat);
   }
 
   // Used by ErrorInfo::classID.
@@ -1134,7 +1133,7 @@ protected:
 ///error to try to convert such a value).
 inline std::error_code inconvertibleErrorCode() {
   return std::error_code(static_cast<int>(ErrorErrorCode::InconvertibleError),
-                         *ErrorErrorCat);
+                         ErrorErrorCat);
 }
 
 /// Helper for converting an std::error_code to a Error.
