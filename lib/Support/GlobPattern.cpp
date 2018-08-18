@@ -47,7 +47,7 @@ static Expected<BitVector> expand(StringRef S, StringRef Original) {
     // It must be in the form of X-Y.
     // Validate it and then interpret the range.
     if (Start > End)
-      return make_error<StringError>("invalid glob pattern: " + Original,
+      return make_error<StringError>("invalid glob pattern: " + Original.str(),
                                      errc::invalid_argument);
 
     for (int C = Start; C <= End; ++C)
@@ -77,7 +77,7 @@ static Expected<BitVector> scan(StringRef &S, StringRef Original) {
   case '[': {
     size_t End = S.find(']', 1);
     if (End == StringRef::npos)
-      return make_error<StringError>("invalid glob pattern: " + Original,
+      return make_error<StringError>("invalid glob pattern: " + Original.str(),
                                      errc::invalid_argument);
 
     StringRef Chars = S.substr(1, End - 1);

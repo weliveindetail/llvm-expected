@@ -9,7 +9,6 @@
 
 #include "llvm/Support/Error.h"
 
-#include "llvm/ADT/Twine.h"
 #include "llvm/Support/Errc.h"
 #include "llvm/Support/ErrorHandling.h"
 #include "llvm/Testing/Support/Error.h"
@@ -432,7 +431,7 @@ TEST(Error, CatchErrorFromHandler) {
 TEST(Error, StringError) {
   std::string Msg;
   raw_string_ostream S(Msg);
-  logAllUnhandledErrors(make_error<StringError>("foo" + Twine(42),
+  logAllUnhandledErrors(make_error<StringError>("foo" + std::to_string(42),
                                                 inconvertibleErrorCode()),
                         S, "");
   EXPECT_EQ(S.str(), "foo42\n") << "Unexpected StringError log result";

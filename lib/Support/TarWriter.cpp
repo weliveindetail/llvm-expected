@@ -163,7 +163,7 @@ Expected<std::unique_ptr<TarWriter>> TarWriter::create(StringRef OutputPath,
   int FD;
   if (std::error_code EC =
           openFileForWrite(OutputPath, FD, CD_CreateAlways, OF_None))
-    return make_error<StringError>("cannot open " + OutputPath, EC);
+    return make_error<StringError>("cannot open " + OutputPath.str(), EC);
   return std::unique_ptr<TarWriter>(new TarWriter(FD, BaseDir));
 }
 

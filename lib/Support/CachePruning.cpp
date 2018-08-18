@@ -42,7 +42,7 @@ static Expected<std::chrono::seconds> parseDuration(StringRef Duration) {
   StringRef NumStr = Duration.slice(0, Duration.size()-1);
   uint64_t Num;
   if (NumStr.getAsInteger(0, Num))
-    return make_error<StringError>("'" + NumStr + "' not an integer",
+    return make_error<StringError>("'" + NumStr.str() + "' not an integer",
                                    inconvertibleErrorCode());
 
   switch (Duration.back()) {
@@ -53,7 +53,7 @@ static Expected<std::chrono::seconds> parseDuration(StringRef Duration) {
   case 'h':
     return std::chrono::hours(Num);
   default:
-    return make_error<StringError>("'" + Duration +
+    return make_error<StringError>("'" + Duration.str() +
                                        "' must end with one of 's', 'm' or 'h'",
                                    inconvertibleErrorCode());
   }
@@ -80,15 +80,15 @@ llvm::parseCachePruningPolicy(StringRef PolicyStr) {
       Policy.Expiration = *DurationOrErr;
     } else if (Key == "cache_size") {
       if (Value.back() != '%')
-        return make_error<StringError>("'" + Value + "' must be a percentage",
+        return make_error<StringError>("'" + Value.str() + "' must be a percentage",
                                        inconvertibleErrorCode());
       StringRef SizeStr = Value.drop_back();
       uint64_t Size;
       if (SizeStr.getAsInteger(0, Size))
-        return make_error<StringError>("'" + SizeStr + "' not an integer",
+        return make_error<StringError>("'" + SizeStr.str() + "' not an integer",
                                        inconvertibleErrorCode());
       if (Size > 100)
-        return make_error<StringError>("'" + SizeStr +
+        return make_error<StringError>("'" + SizeStr.str() +
                                            "' must be between 0 and 100",
                                        inconvertibleErrorCode());
       Policy.MaxSizePercentageOfAvailableSpace = Size;
@@ -110,15 +110,15 @@ llvm::parseCachePruningPolicy(StringRef PolicyStr) {
       }
       uint64_t Size;
       if (Value.getAsInteger(0, Size))
-        return make_error<StringError>("'" + Value + "' not an integer",
+        return make_error<StringError>("'" + Value.str() + "' not an integer",
                                        inconvertibleErrorCode());
       Policy.MaxSizeBytes = Size * Mult;
     } else if (Key == "cache_size_files") {
       if (Value.getAsInteger(0, Policy.MaxSizeFiles))
-        return make_error<StringError>("'" + Value + "' not an integer",
+        return make_error<StringError>("'" + Value.str() + "' not an integer",
                                        inconvertibleErrorCode());
     } else {
-      return make_error<StringError>("Unknown key: '" + Key + "'",
+      return make_error<StringError>("Unknown key: '" + Key.str() + "'",
                                      inconvertibleErrorCode());
     }
   }

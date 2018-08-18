@@ -14,7 +14,6 @@
 #ifndef LLVM_SUPPORT_ERROR_H
 #define LLVM_SUPPORT_ERROR_H
 
-#include "llvm/ADT/Twine.h"
 #include "llvm/Config/abi-breaking.h"
 #include "llvm/Support/AlignOf.h"
 #include "llvm/Support/Compiler.h"
@@ -980,7 +979,8 @@ Expected<T> handleExpected(Expected<T> ValOrErr, RecoveryFtor &&RecoveryPath,
 /// This is useful in the base level of your program to allow clean termination
 /// (allowing clean deallocation of resources, etc.), while reporting error
 /// information to the user.
-inline void logAllUnhandledErrors(Error E, raw_ostream &OS, Twine ErrorBanner) {
+  inline void logAllUnhandledErrors(Error E, raw_ostream &OS,
+                                    std::string ErrorBanner) {
   if (!E)
     return;
   OS << ErrorBanner;
@@ -1010,6 +1010,8 @@ inline std::string toString(Error E) {
   handleAllErrors(std::move(E), [&Result](const ErrorInfoBase &EI) {
     Result += EI.message() + "\n";
   });
+  if (!Result.empty())
+    Result.pop_back();
   return Result;
 }
 
@@ -1177,7 +1179,7 @@ class StringError : public ErrorInfo<StringError> {
 public:
   inline static const char ID = 0;
 
-  StringError(const Twine &S, std::error_code EC) : Msg(S.str()), EC(EC) {}
+  StringError(std::string S, std::error_code EC) : Msg(std::move(S)), EC(EC) {}
 
   void log(raw_ostream &OS) const override { OS << Msg; }
   std::error_code convertToErrorCode() const override { return EC; }
