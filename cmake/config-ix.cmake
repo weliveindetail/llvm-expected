@@ -405,7 +405,8 @@ elseif (LLVM_NATIVE_ARCH MATCHES "riscv32")
 elseif (LLVM_NATIVE_ARCH MATCHES "riscv64")
   set(LLVM_NATIVE_ARCH RISCV)
 else ()
-  message(FATAL_ERROR "Unknown architecture ${LLVM_NATIVE_ARCH}")
+  #message(FATAL_ERROR "Unknown architecture ${LLVM_NATIVE_ARCH}")
+  set(LLVM_NATIVE_ARCH X86)
 endif ()
 
 # If build targets includes "host", then replace with native architecture.

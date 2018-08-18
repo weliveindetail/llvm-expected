@@ -9,11 +9,9 @@
 
 #include "llvm/Support/Error.h"
 
-#include "llvm/Support/Errc.h"
-#include "llvm/Support/ErrorHandling.h"
-#include "llvm/Testing/Support/Error.h"
 #include "gtest/gtest-spi.h"
 #include "gtest/gtest.h"
+#include <cinttypes>
 #include <memory>
 
 using namespace llvm;
@@ -30,7 +28,7 @@ public:
   int getInfo() const { return Info; }
 
   // Log this error to a stream.
-  void log(raw_ostream &OS) const override {
+  void log(std::ostream &OS) const override {
     OS << "CustomError {" << getInfo() << "}";
   }
 
@@ -66,7 +64,7 @@ public:
   int getExtraInfo() const { return ExtraInfo; }
 
   // Log this error to a stream.
-  void log(raw_ostream &OS) const override {
+  void log(std::ostream &OS) const override {
     OS << "CustomSubError { " << getInfo() << ", " << getExtraInfo() << "}";
   }
 
@@ -429,37 +427,32 @@ TEST(Error, CatchErrorFromHandler) {
 }
 
 TEST(Error, StringError) {
-  std::string Msg;
-  raw_string_ostream S(Msg);
+  std::ostringstream S;
   logAllUnhandledErrors(make_error<StringError>("foo" + std::to_string(42),
                                                 inconvertibleErrorCode()),
                         S, "");
   EXPECT_EQ(S.str(), "foo42\n") << "Unexpected StringError log result";
 
   auto EC =
-    errorToErrorCode(make_error<StringError>("", errc::invalid_argument));
-  EXPECT_EQ(EC, errc::invalid_argument)
+  errorToErrorCode(make_error<StringError>("", std::make_error_code(std::errc::invalid_argument)));
+  EXPECT_EQ(EC, std::make_error_code(std::errc::invalid_argument))
     << "Failed to convert StringError to error_code.";
 }
 
 TEST(Error, createStringError) {
   static const char *Bar = "bar";
-  static const std::error_code EC = errc::invalid_argument;
-  std::string Msg;
-  raw_string_ostream S(Msg);
+  static const auto EC = std::make_error_code(std::errc::invalid_argument);
+  std::ostringstream S1;
   logAllUnhandledErrors(createStringError(EC, "foo%s%d0x%" PRIx8, Bar, 1, 0xff),
-                        S, "");
-  EXPECT_EQ(S.str(), "foobar10xff\n")
+                        S1, "");
+  EXPECT_EQ(S1.str(), "foobar10xff\n")
     << "Unexpected createStringError() log result";
 
-  S.flush();
-  Msg.clear();
-  logAllUnhandledErrors(createStringError(EC, Bar), S, "");
-  EXPECT_EQ(S.str(), "bar\n")
+  std::ostringstream S2;
+  logAllUnhandledErrors(createStringError(EC, Bar), S2, "");
+  EXPECT_EQ(S2.str(), "bar\n")
     << "Unexpected createStringError() (overloaded) log result";
 
-  S.flush();
-  Msg.clear();
   auto Res = errorToErrorCode(createStringError(EC, "foo%s", Bar));
   EXPECT_EQ(Res, EC)
     << "Failed to convert createStringError() result to error_code.";
@@ -690,8 +683,8 @@ TEST(Error, ErrorCodeConversions) {
       << "std::error_code() should round-trip via Error conversions";
 
   // Round-trip an error value to check that it converts correctly.
-  EXPECT_EQ(errorToErrorCode(errorCodeToError(errc::invalid_argument)),
-            errc::invalid_argument)
+  auto EC = std::make_error_code(std::errc::invalid_argument);
+  EXPECT_EQ(errorToErrorCode(errorCodeToError(EC)), EC)
       << "std::error_code error value should round-trip via Error "
          "conversions";
 }
@@ -718,22 +711,21 @@ TEST(Error, ErrorMessage) {
 TEST(Error, Stream) {
   {
     Error OK = Error::success();
-    std::string Buf;
-    llvm::raw_string_ostream S(Buf);
+    std::ostringstream S;
     S << OK;
     EXPECT_EQ("success", S.str());
     consumeError(std::move(OK));
   }
   {
     Error E1 = make_error<CustomError>(0);
-    std::string Buf;
-    llvm::raw_string_ostream S(Buf);
+    std::ostringstream S;
     S << E1;
     EXPECT_EQ("CustomError {0}", S.str());
     consumeError(std::move(E1));
   }
 }
 
+/*
 TEST(Error, ErrorMatchers) {
   EXPECT_THAT_ERROR(Error::success(), Succeeded());
   EXPECT_NONFATAL_FAILURE(
@@ -807,5 +799,6 @@ TEST(Error, ErrorMatchers) {
       "Expected: succeeded with value (is > 1)\n"
       "  Actual: failed  (CustomError {0})");
 }
+*/
 
 } // end anon namespace

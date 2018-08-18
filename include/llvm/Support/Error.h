@@ -17,21 +17,71 @@
 #include "llvm/Config/abi-breaking.h"
 #include "llvm/Support/AlignOf.h"
 #include "llvm/Support/Compiler.h"
-#include "llvm/Support/Debug.h"
-#include "llvm/Support/ErrorHandling.h"
-#include "llvm/Support/raw_ostream.h"
 #include <algorithm>
 #include <cassert>
 #include <cstdint>
 #include <cstdlib>
 #include <functional>
+#include <iostream>
 #include <memory>
+#include <mutex>
 #include <new>
+#include <sstream>
 #include <string>
 #include <system_error>
 #include <type_traits>
 #include <utility>
 #include <vector>
+
+#if defined(HAVE_UNISTD_H)
+# include <unistd.h>
+#endif
+#if defined(_MSC_VER)
+# include <io.h>
+# include <fcntl.h>
+#endif
+
+namespace llvm {
+  
+/// This function calls abort(), and prints the optional message to stderr.
+/// Use the llvm_unreachable macro (that adds location info), instead of
+/// calling this function directly.
+LLVM_ATTRIBUTE_NORETURN void
+llvm_unreachable_internal(const char *msg, const char *file, unsigned line) {
+  // This code intentionally doesn't call the ErrorHandler callback, because
+  // llvm_unreachable is intended to be used to indicate "impossible"
+  // situations, and not legitimate runtime errors.
+  if (msg)
+    std::cerr << msg << "\n";
+  std::cerr << "UNREACHABLE executed";
+  if (file)
+    std::cerr << " at " << file << ":" << line;
+  std::cerr << "!\n";
+  abort();
+#ifdef LLVM_BUILTIN_UNREACHABLE
+  // Windows systems and possibly others don't declare abort() to be noreturn,
+  // so use the unreachable builtin to avoid a Clang self-host warning.
+  LLVM_BUILTIN_UNREACHABLE;
+#endif
+}
+}
+
+/// Marks that the current location is not supposed to be reachable.
+/// In !NDEBUG builds, prints the message and location info to stderr.
+/// In NDEBUG builds, becomes an optimizer hint that the current location
+/// is not supposed to be reachable.  On compilers that don't support
+/// such hints, prints a reduced message instead.
+///
+/// Use this instead of assert(0).  It conveys intent more clearly and
+/// allows compilers to omit some unnecessary code.
+#ifndef NDEBUG
+#define llvm_unreachable(msg) \
+::llvm::llvm_unreachable_internal(msg, __FILE__, __LINE__)
+#elif defined(LLVM_BUILTIN_UNREACHABLE)
+#define llvm_unreachable(msg) LLVM_BUILTIN_UNREACHABLE
+#else
+#define llvm_unreachable(msg) ::llvm::llvm_unreachable_internal()
+#endif
 
 namespace {
   
@@ -74,12 +124,11 @@ public:
   virtual ~ErrorInfoBase() = default;
 
   /// Print an error message to an output stream.
-  virtual void log(raw_ostream &OS) const = 0;
+  virtual void log(std::ostream &OS) const = 0;
 
   /// Return the error message as a string.
   virtual std::string message() const {
-    std::string Msg;
-    raw_string_ostream OS(Msg);
+    std::ostringstream OS;
     log(OS);
     return OS.str();
   }
@@ -277,11 +326,11 @@ private:
   // inlined.
   LLVM_ATTRIBUTE_NORETURN
   void fatalUncheckedError() const {
-    dbgs() << "Program aborted due to an unhandled Error:\n";
+    std::cerr << "Program aborted due to an unhandled Error:\n";
     if (getPtr())
-      getPtr()->log(dbgs());
+      getPtr()->log(std::cerr);
     else
-      dbgs() << "Error value was Success. (Note: Success values must still be "
+      std::cerr << "Error value was Success. (Note: Success values must still be "
       "checked prior to being destroyed).\n";
     abort();
   }
@@ -333,7 +382,7 @@ private:
     return Tmp;
   }
 
-  friend raw_ostream &operator<<(raw_ostream &OS, const Error &E) {
+  friend std::ostream &operator<<(std::ostream &OS, const Error &E) {
     if (auto P = E.getPtr())
       P->log(OS);
     else
@@ -354,7 +403,7 @@ inline ErrorSuccess Error::success() { return ErrorSuccess(); }
 /// Make a Error instance representing failure using the given error info
 /// type.
 template <typename ErrT, typename... ArgTs> Error make_error(ArgTs &&... Args) {
-  return Error(llvm::make_unique<ErrT>(std::forward<ArgTs>(Args)...));
+  return Error(std::make_unique<ErrT>(std::forward<ArgTs>(Args)...));
 }
 
 /// Base class for user error types. Users should declare their error types
@@ -390,7 +439,7 @@ class ErrorList final : public ErrorInfo<ErrorList> {
   friend Error joinErrors(Error, Error);
 
 public:
-  void log(raw_ostream &OS) const override {
+  void log(std::ostream &OS) const override {
     OS << "Multiple errors:\n";
     for (auto &ErrPayload : Payloads) {
       ErrPayload->log(OS);
@@ -680,12 +729,12 @@ private:
   LLVM_ATTRIBUTE_NORETURN
   LLVM_ATTRIBUTE_NOINLINE
   void fatalUncheckedExpected() const {
-    dbgs() << "Expected<T> must be checked before access or destruction.\n";
+    std::cerr << "Expected<T> must be checked before access or destruction.\n";
     if (HasError) {
-      dbgs() << "Unchecked Expected<T> contained error:\n";
-      (*getErrorStorage())->log(dbgs());
+      std::cerr << "Unchecked Expected<T> contained error:\n";
+      (*getErrorStorage())->log(std::cerr);
     } else
-      dbgs() << "Expected<T> value was in success state. (Note: Expected<T> "
+      std::cerr << "Expected<T> value was in success state. (Note: Expected<T> "
                 "values in success mode must still be checked prior to being "
                 "destroyed).\n";
     abort();
@@ -977,7 +1026,7 @@ Expected<T> handleExpected(Expected<T> ValOrErr, RecoveryFtor &&RecoveryPath,
 /// This is useful in the base level of your program to allow clean termination
 /// (allowing clean deallocation of resources, etc.), while reporting error
 /// information to the user.
-  inline void logAllUnhandledErrors(Error E, raw_ostream &OS,
+  inline void logAllUnhandledErrors(Error E, std::ostream &OS,
                                     std::string ErrorBanner) {
   if (!E)
     return;
@@ -993,12 +1042,8 @@ Expected<T> handleExpected(Expected<T> ValOrErr, RecoveryFtor &&RecoveryPath,
 LLVM_ATTRIBUTE_NORETURN inline void report_fatal_error(Error Err,
                                                 bool gen_crash_diag = true) {
   assert(Err && "report_fatal_error called with success value");
-  std::string ErrMsg;
-  {
-    raw_string_ostream ErrStream(ErrMsg);
-    logAllUnhandledErrors(std::move(Err), ErrStream, "");
-  }
-  report_fatal_error(ErrMsg); // in ErrorHandling
+  logAllUnhandledErrors(std::move(Err), std::cerr, "Fatal Error");
+  exit(1); // If we reached here, we are failing ungracefully.
 }
 
 /// Write all error messages (if any) in E to a string. The newline character
@@ -1110,7 +1155,7 @@ class ECError : public ErrorInfo<ECError> {
 public:
   void setErrorCode(std::error_code EC) { this->EC = EC; }
   std::error_code convertToErrorCode() const override { return EC; }
-  void log(raw_ostream &OS) const override { OS << EC.message(); }
+  void log(std::ostream &OS) const override { OS << EC.message(); }
 
   // Used by ErrorInfo::classID.
   inline static const char ID = 0;
@@ -1137,7 +1182,7 @@ inline std::error_code inconvertibleErrorCode() {
 inline Error errorCodeToError(std::error_code EC) {
   if (!EC)
     return Error::success();
-  return Error(llvm::make_unique<ECError>(ECError(EC)));
+  return Error(std::make_unique<ECError>(ECError(EC)));
 }
 
 /// Helper for converting an ECError to a std::error_code.
@@ -1149,8 +1194,10 @@ inline std::error_code errorToErrorCode(Error Err) {
   handleAllErrors(std::move(Err), [&](const ErrorInfoBase &EI) {
     EC = EI.convertToErrorCode();
   });
-  if (EC == inconvertibleErrorCode())
-    report_fatal_error(EC.message());
+  if (EC == inconvertibleErrorCode()) {
+    logAllUnhandledErrors(std::move(Err), std::cerr, "Fatal Error");
+    exit(1); // If we reached here, we are failing ungracefully.
+  }
   return EC;
 }
 
@@ -1165,7 +1212,7 @@ public:
 
   StringError(std::string S, std::error_code EC) : Msg(std::move(S)), EC(EC) {}
 
-  void log(raw_ostream &OS) const override { OS << Msg; }
+  void log(std::ostream &OS) const override { OS << Msg; }
   std::error_code convertToErrorCode() const override { return EC; }
 
   const std::string &getMessage() const { return Msg; }
@@ -1228,7 +1275,7 @@ private:
   void checkError(Error Err) const {
     if (Err) {
       int ExitCode = GetExitCode(Err);
-      logAllUnhandledErrors(std::move(Err), errs(), Banner);
+      logAllUnhandledErrors(std::move(Err), std::cerr, Banner);
       exit(ExitCode);
     }
   }
