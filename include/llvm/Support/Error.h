@@ -14,7 +14,6 @@
 #ifndef LLVM_SUPPORT_ERROR_H
 #define LLVM_SUPPORT_ERROR_H
 
-#include "llvm/ADT/StringExtras.h"
 #include "llvm/ADT/Twine.h"
 #include "llvm/Config/abi-breaking.h"
 #include "llvm/Support/AlignOf.h"
@@ -1007,11 +1006,11 @@ LLVM_ATTRIBUTE_NORETURN inline void report_fatal_error(Error Err,
 /// Write all error messages (if any) in E to a string. The newline character
 /// is used to separate error messages.
 inline std::string toString(Error E) {
-  std::vector<std::string> Errors;
-  handleAllErrors(std::move(E), [&Errors](const ErrorInfoBase &EI) {
-    Errors.push_back(EI.message());
+  std::string Result;
+  handleAllErrors(std::move(E), [&Result](const ErrorInfoBase &EI) {
+    Result += EI.message() + "\n";
   });
-  return join(Errors.begin(), Errors.end(), "\n");
+  return Result;
 }
 
 /// Consume a Error without doing anything. This method should be used

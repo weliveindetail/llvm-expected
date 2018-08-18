@@ -13,6 +13,8 @@
 #include "llvm/Support/BinaryStreamReader.h"
 #include "llvm/Support/BinaryStreamRef.h"
 
+#include "llvm/ADT/StringExtras.h"
+
 using namespace llvm;
 
 BinaryStreamWriter::BinaryStreamWriter(WritableBinaryStreamRef Ref)

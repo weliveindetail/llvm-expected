@@ -10,6 +10,7 @@
 #include "llvm/Support/JSON.h"
 #include "llvm/Support/ConvertUTF.h"
 #include "llvm/Support/Format.h"
+#include "llvm/ADT/StringExtras.h"
 #include <cctype>
 
 namespace llvm {
