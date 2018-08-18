@@ -15,9 +15,9 @@
 #define LLVM_SUPPORT_ERROR_H
 
 #include "llvm/Config/abi-breaking.h"
-#include "llvm/Support/Compiler.h"
 #include <algorithm>
 #include <cassert>
+#include <cstddef>
 #include <cstdint>
 #include <cstdlib>
 #include <functional>
@@ -35,12 +35,96 @@
 #if defined(HAVE_UNISTD_H)
 # include <unistd.h>
 #endif
+
 #if defined(_MSC_VER)
 # include <io.h>
 # include <fcntl.h>
+#include <sal.h>
 #endif
 
-#include <cstddef>
+#ifndef __has_feature
+# define __has_feature(x) 0
+#endif
+
+#ifndef __has_extension
+# define __has_extension(x) 0
+#endif
+
+#ifndef __has_attribute
+# define __has_attribute(x) 0
+#endif
+
+#ifndef __has_cpp_attribute
+# define __has_cpp_attribute(x) 0
+#endif
+
+#ifndef __has_builtin
+# define __has_builtin(x) 0
+#endif
+
+/// \macro LLVM_GNUC_PREREQ
+/// Extend the default __GNUC_PREREQ even if glibc's features.h isn't
+/// available.
+#ifndef LLVM_GNUC_PREREQ
+# if defined(__GNUC__) && defined(__GNUC_MINOR__) && defined(__GNUC_PATCHLEVEL__)
+#  define LLVM_GNUC_PREREQ(maj, min, patch) \
+    ((__GNUC__ << 20) + (__GNUC_MINOR__ << 10) + __GNUC_PATCHLEVEL__ >= \
+     ((maj) << 20) + ((min) << 10) + (patch))
+# elif defined(__GNUC__) && defined(__GNUC_MINOR__)
+#  define LLVM_GNUC_PREREQ(maj, min, patch) \
+    ((__GNUC__ << 20) + (__GNUC_MINOR__ << 10) >= ((maj) << 20) + ((min) << 10))
+# else
+#  define LLVM_GNUC_PREREQ(maj, min, patch) 0
+# endif
+#endif
+
+#ifdef __GNUC__
+#define LLVM_ATTRIBUTE_NORETURN __attribute__((noreturn))
+#elif defined(_MSC_VER)
+#define LLVM_ATTRIBUTE_NORETURN __declspec(noreturn)
+#else
+#define LLVM_ATTRIBUTE_NORETURN
+#endif
+
+#if __has_builtin(__builtin_expect) || LLVM_GNUC_PREREQ(4, 0, 0)
+#define LLVM_LIKELY(EXPR) __builtin_expect((bool)(EXPR), true)
+#define LLVM_UNLIKELY(EXPR) __builtin_expect((bool)(EXPR), false)
+#else
+#define LLVM_LIKELY(EXPR) (EXPR)
+#define LLVM_UNLIKELY(EXPR) (EXPR)
+#endif
+
+/// LLVM_ATTRIBUTE_NOINLINE - On compilers where we have a directive to do so,
+/// mark a method "not for inlining".
+#if __has_attribute(noinline) || LLVM_GNUC_PREREQ(3, 4, 0)
+#define LLVM_ATTRIBUTE_NOINLINE __attribute__((noinline))
+#elif defined(_MSC_VER)
+#define LLVM_ATTRIBUTE_NOINLINE __declspec(noinline)
+#else
+#define LLVM_ATTRIBUTE_NOINLINE
+#endif
+
+/// LLVM_NODISCARD - Warn if a type or return value is discarded.
+#if __cplusplus > 201402L && __has_cpp_attribute(nodiscard)
+#define LLVM_NODISCARD [[nodiscard]]
+#elif !__cplusplus
+// Workaround for llvm.org/PR23435, since clang 3.6 and below emit a spurious
+// error when __has_cpp_attribute is given a scoped attribute in C mode.
+#define LLVM_NODISCARD
+#elif __has_cpp_attribute(clang::warn_unused_result)
+#define LLVM_NODISCARD [[clang::warn_unused_result]]
+#else
+#define LLVM_NODISCARD
+#endif
+
+/// LLVM_BUILTIN_UNREACHABLE - On compilers which support it, expands
+/// to an expression which states that it is undefined behavior for the
+/// compiler to reach this point.  Otherwise is not defined.
+#if __has_builtin(__builtin_unreachable) || LLVM_GNUC_PREREQ(4, 5, 0)
+# define LLVM_BUILTIN_UNREACHABLE __builtin_unreachable()
+#elif defined(_MSC_VER)
+# define LLVM_BUILTIN_UNREACHABLE __assume(false)
+#endif
 
 namespace llvm {
 
