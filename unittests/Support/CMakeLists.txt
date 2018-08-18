@@ -75,6 +75,7 @@ add_llvm_unittest(SupportTests
   xxhashTest.cpp
   )
 
+set_target_properties(SupportTests PROPERTIES CXX_STANDARD 17)
 target_link_libraries(SupportTests PRIVATE LLVMTestingSupport)
 
 # Disable all warning for AlignOfTest.cpp,

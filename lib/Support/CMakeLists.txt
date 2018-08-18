@@ -165,4 +165,5 @@ add_llvm_library(LLVMSupport
   LINK_LIBS ${system_libs}
   )
 
+set_target_properties(LLVMSupport PROPERTIES CXX_STANDARD 17)
 set_property(TARGET LLVMSupport PROPERTY LLVM_SYSTEM_LIBS "${system_libs}")
