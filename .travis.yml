@@ -1,0 +1,24 @@
+dist: trusty
+sudo: true
+language: c++
+compiler: gcc
+
+addons:
+  apt:
+    sources:
+    - ubuntu-toolchain-r-test
+    packages:
+    - build-essential
+    - cmake
+    - gcc-7
+    - g++-7
+    - libgtest-dev
+
+script:
+    - export CC=gcc-7
+    - export CXX=g++-7
+    - mkdir build-test-debug
+    - cd build-test-debug
+    - cmake ..
+    - cmake --build .
+    - ./llvm-expected-test
