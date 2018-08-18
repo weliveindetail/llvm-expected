@@ -141,6 +141,7 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 include_directories(
   ${LLVM_INCLUDE_DIR} ${LLVM_MAIN_INCLUDE_DIR}
+  ${CMAKE_CURRENT_SOURCE_DIR}
   "${CMAKE_CURRENT_SOURCE_DIR}/unittests/googletest/googletest/include")
 
 # when crosscompiling import the executable targets from a file

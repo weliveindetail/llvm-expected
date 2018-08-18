@@ -7,7 +7,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/Error.h"
+#include "llvm-expected.h"
 
 #include "gtest/gtest-spi.h"
 #include "gtest/gtest.h"
