@@ -19,7 +19,6 @@
 #include "llvm/Support/Compiler.h"
 #include "llvm/Support/Debug.h"
 #include "llvm/Support/ErrorHandling.h"
-#include "llvm/Support/ErrorOr.h"
 #include "llvm/Support/Format.h"
 #include "llvm/Support/raw_ostream.h"
 #include <algorithm>
@@ -1154,20 +1153,6 @@ inline std::error_code errorToErrorCode(Error Err) {
   if (EC == inconvertibleErrorCode())
     report_fatal_error(EC.message());
   return EC;
-}
-  
-/// Convert an ErrorOr<T> to an Expected<T>.
-template <typename T> Expected<T> errorOrToExpected(ErrorOr<T> &&EO) {
-  if (auto EC = EO.getError())
-    return errorCodeToError(EC);
-  return std::move(*EO);
-}
-
-/// Convert an Expected<T> to an ErrorOr<T>.
-template <typename T> ErrorOr<T> expectedToErrorOr(Expected<T> &&E) {
-  if (auto Err = E.takeError())
-    return errorToErrorCode(std::move(Err));
-  return std::move(*E);
 }
 
 /// This class wraps a string in an Error.
