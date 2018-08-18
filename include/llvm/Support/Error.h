@@ -14,7 +14,6 @@
 #ifndef LLVM_SUPPORT_ERROR_H
 #define LLVM_SUPPORT_ERROR_H
 
-#include "llvm/ADT/STLExtras.h"
 #include "llvm/ADT/StringExtras.h"
 #include "llvm/ADT/Twine.h"
 #include "llvm/Config/abi-breaking.h"
