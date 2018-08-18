@@ -14,7 +14,6 @@
 #ifndef LLVM_SUPPORT_ERROR_H
 #define LLVM_SUPPORT_ERROR_H
 
-#include "llvm/ADT/SmallVector.h"
 #include "llvm/ADT/STLExtras.h"
 #include "llvm/ADT/StringExtras.h"
 #include "llvm/ADT/Twine.h"
@@ -1009,7 +1008,7 @@ LLVM_ATTRIBUTE_NORETURN inline void report_fatal_error(Error Err,
 /// Write all error messages (if any) in E to a string. The newline character
 /// is used to separate error messages.
 inline std::string toString(Error E) {
-  SmallVector<std::string, 2> Errors;
+  std::vector<std::string> Errors;
   handleAllErrors(std::move(E), [&Errors](const ErrorInfoBase &EI) {
     Errors.push_back(EI.message());
   });
