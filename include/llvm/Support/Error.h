@@ -14,7 +14,6 @@
 #ifndef LLVM_SUPPORT_ERROR_H
 #define LLVM_SUPPORT_ERROR_H
 
-#include "llvm/Config/abi-breaking.h"
 #include <algorithm>
 #include <cassert>
 #include <cstddef>
@@ -32,14 +31,12 @@
 #include <utility>
 #include <vector>
 
-#if defined(HAVE_UNISTD_H)
-# include <unistd.h>
-#endif
-
 #if defined(_MSC_VER)
 # include <io.h>
 # include <fcntl.h>
-#include <sal.h>
+# include <sal.h>
+#else
+# include <unistd.h>
 #endif
 
 #ifndef __has_feature
@@ -526,7 +523,7 @@ public:
   }
 
 private:
-#if LLVM_ENABLE_ABI_BREAKING_CHECKS
+#if !defined(NDEBUG)
   // assertIsChecked() happens very frequently, but under normal circumstances
   // is supposed to be a no-op.  So we want it to be inlined, but having a bunch
   // of debug prints can cause the function to be too large for inlining.  So
@@ -545,7 +542,7 @@ private:
 #endif
 
   void assertIsChecked() {
-#if LLVM_ENABLE_ABI_BREAKING_CHECKS
+#if !defined(NDEBUG)
     if (LLVM_UNLIKELY(!getChecked() || getPtr()))
       fatalUncheckedError();
 #endif
@@ -558,7 +555,7 @@ private:
   }
 
   void setPtr(ErrorInfoBase *EI) {
-#if LLVM_ENABLE_ABI_BREAKING_CHECKS
+#if !defined(NDEBUG)
     Payload = reinterpret_cast<ErrorInfoBase*>(
                 (reinterpret_cast<uintptr_t>(EI) &
                  ~static_cast<uintptr_t>(0x1)) |
@@ -569,7 +566,7 @@ private:
   }
 
   bool getChecked() const {
-#if LLVM_ENABLE_ABI_BREAKING_CHECKS
+#if !defined(NDEBUG)
     return (reinterpret_cast<uintptr_t>(Payload) & 0x1) == 0;
 #else
     return true;
@@ -738,7 +735,7 @@ public:
   /// Create an Expected<T> error value from the given Error.
   Expected(Error Err)
       : HasError(true)
-#if LLVM_ENABLE_ABI_BREAKING_CHECKS
+#if !defined(NDEBUG)
         // Expected is unchecked upon construction in Debug builds.
         , Unchecked(true)
 #endif
@@ -759,7 +756,7 @@ public:
            typename std::enable_if<std::is_convertible<OtherT, T>::value>::type
                * = nullptr)
       : HasError(false)
-#if LLVM_ENABLE_ABI_BREAKING_CHECKS
+#if !defined(NDEBUG)
         // Expected is unchecked upon construction in Debug builds.
         , Unchecked(true)
 #endif
@@ -806,7 +803,7 @@ public:
 
   /// Return false if there is an error.
   explicit operator bool() {
-#if LLVM_ENABLE_ABI_BREAKING_CHECKS
+#if !defined(NDEBUG)
     Unchecked = HasError;
 #endif
     return !HasError;
@@ -834,7 +831,7 @@ public:
   /// only be safely destructed. No further calls (beside the destructor) should
   /// be made on the Expected<T> vaule.
   Error takeError() {
-#if LLVM_ENABLE_ABI_BREAKING_CHECKS
+#if !defined(NDEBUG)
     Unchecked = false;
 #endif
     return HasError ? Error(std::move(*getErrorStorage())) : Error::success();
@@ -877,7 +874,7 @@ private:
 
   template <class OtherT> void moveConstruct(Expected<OtherT> &&Other) {
     HasError = Other.HasError;
-#if LLVM_ENABLE_ABI_BREAKING_CHECKS
+#if !defined(NDEBUG)
     Unchecked = true;
     Other.Unchecked = false;
 #endif
@@ -928,12 +925,12 @@ private:
 
   // Used by ExpectedAsOutParameter to reset the checked flag.
   void setUnchecked() {
-#if LLVM_ENABLE_ABI_BREAKING_CHECKS
+#if !defined(NDEBUG)
     Unchecked = true;
 #endif
   }
 
-#if LLVM_ENABLE_ABI_BREAKING_CHECKS
+#if !defined(NDEBUG)
   LLVM_ATTRIBUTE_NORETURN
   LLVM_ATTRIBUTE_NOINLINE
   void fatalUncheckedExpected() const {
@@ -950,7 +947,7 @@ private:
 #endif
 
   void assertIsChecked() {
-#if LLVM_ENABLE_ABI_BREAKING_CHECKS
+#if !defined(NDEBUG)
     if (LLVM_UNLIKELY(Unchecked))
       fatalUncheckedExpected();
 #endif
@@ -961,7 +958,7 @@ private:
     AlignedCharArrayUnion<error_type> ErrorStorage;
   };
   bool HasError : 1;
-#if LLVM_ENABLE_ABI_BREAKING_CHECKS
+#if !defined(NDEBUG)
   bool Unchecked : 1;
 #endif
 };
@@ -1493,20 +1490,5 @@ private:
 };
   
 } // end namespace llvm
-  
-#ifndef _MSC_VER
-namespace llvm {
-    
-  // One of these two variables will be referenced by a symbol defined in
-  // llvm-config.h. We provide a link-time (or load time for DSO) failure when
-  // there is a mismatch in the build configuration of the API client and LLVM.
-#if LLVM_ENABLE_ABI_BREAKING_CHECKS
-  inline int EnableABIBreakingChecks;
-#else
-  inline int DisableABIBreakingChecks;
-#endif
-
-} // end namespace llvm
-#endif
 
 #endif // LLVM_SUPPORT_ERROR_H

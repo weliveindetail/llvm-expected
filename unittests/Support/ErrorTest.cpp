@@ -101,7 +101,7 @@ TEST(Error, CheckedSuccess) {
 }
 
 // Test that unchecked succes values cause an abort.
-#if LLVM_ENABLE_ABI_BREAKING_CHECKS
+#if !defined(NDEBUG)
 TEST(Error, UncheckedSuccess) {
   EXPECT_DEATH({ Error E = Error::success(); },
                "Program aborted due to an unhandled Error:")
@@ -127,7 +127,7 @@ TEST(Error, ErrorAsOutParameterChecked) {
 }
 
 // Test that ErrorAsOutParameter clears the checked flag on destruction.
-#if LLVM_ENABLE_ABI_BREAKING_CHECKS
+#if !defined(NDEBUG)
 TEST(Error, ErrorAsOutParameterUnchecked) {
   EXPECT_DEATH({ Error E = Error::success(); errAsOutParamHelper(E); },
                "Program aborted due to an unhandled Error:")
@@ -138,7 +138,7 @@ TEST(Error, ErrorAsOutParameterUnchecked) {
 // Check that we abort on unhandled failure cases. (Force conversion to bool
 // to make sure that we don't accidentally treat checked errors as handled).
 // Test runs in debug mode only.
-#if LLVM_ENABLE_ABI_BREAKING_CHECKS
+#if !defined(NDEBUG)
 TEST(Error, UncheckedError) {
   auto DropUnhandledError = []() {
     Error E = make_error<CustomError>(42);
@@ -376,11 +376,11 @@ TEST(Error, ConsumeError) {
 
 // Test that handleAllUnhandledErrors crashes if an error is not caught.
 // Test runs in debug mode only.
-#if LLVM_ENABLE_ABI_BREAKING_CHECKS
+#if !defined(NDEBUG)
 TEST(Error, FailureToHandle) {
   auto FailToHandle = []() {
     handleAllErrors(make_error<CustomError>(7), [&](const CustomSubError &SE) {
-      errs() << "This should never be called";
+      std::cerr << "This should never be called";
       exit(1);
     });
   };
@@ -395,7 +395,7 @@ TEST(Error, FailureToHandle) {
 // Test that handleAllUnhandledErrors crashes if an error is returned from a
 // handler.
 // Test runs in debug mode only.
-#if LLVM_ENABLE_ABI_BREAKING_CHECKS
+#if !defined(NDEBUG)
 TEST(Error, FailureFromHandler) {
   auto ReturnErrorFromHandler = []() {
     handleAllErrors(make_error<CustomError>(7),
@@ -500,7 +500,7 @@ TEST(Error, CantFailSuccess) {
 }
 
 // Test that cantFail results in a crash if you pass it a failure value.
-#if LLVM_ENABLE_ABI_BREAKING_CHECKS && !defined(NDEBUG)
+#if !defined(NDEBUG)
 TEST(Error, CantFailDeath) {
   EXPECT_DEATH(
       cantFail(make_error<StringError>("foo", inconvertibleErrorCode()),
@@ -541,7 +541,7 @@ TEST(Error, ExpectedWithReferenceType) {
 // Test Unchecked Expected<T> in success mode.
 // We expect this to blow up the same way Error would.
 // Test runs in debug mode only.
-#if LLVM_ENABLE_ABI_BREAKING_CHECKS
+#if !defined(NDEBUG)
 TEST(Error, UncheckedExpectedInSuccessModeDestruction) {
   EXPECT_DEATH({ Expected<int> A = 7; },
                "Expected<T> must be checked before access or destruction.")
@@ -552,7 +552,7 @@ TEST(Error, UncheckedExpectedInSuccessModeDestruction) {
 // Test Unchecked Expected<T> in success mode.
 // We expect this to blow up the same way Error would.
 // Test runs in debug mode only.
-#if LLVM_ENABLE_ABI_BREAKING_CHECKS
+#if !defined(NDEBUG)
 TEST(Error, UncheckedExpectedInSuccessModeAccess) {
   EXPECT_DEATH({ Expected<int> A = 7; *A; },
                "Expected<T> must be checked before access or destruction.")
@@ -563,7 +563,7 @@ TEST(Error, UncheckedExpectedInSuccessModeAccess) {
 // Test Unchecked Expected<T> in success mode.
 // We expect this to blow up the same way Error would.
 // Test runs in debug mode only.
-#if LLVM_ENABLE_ABI_BREAKING_CHECKS
+#if !defined(NDEBUG)
 TEST(Error, UncheckedExpectedInSuccessModeAssignment) {
   EXPECT_DEATH({ Expected<int> A = 7; A = 7; },
                "Expected<T> must be checked before access or destruction.")
@@ -583,7 +583,7 @@ TEST(Error, ExpectedInFailureMode) {
 // Check that an Expected instance with an error value doesn't allow access to
 // operator*.
 // Test runs in debug mode only.
-#if LLVM_ENABLE_ABI_BREAKING_CHECKS
+#if !defined(NDEBUG)
 TEST(Error, AccessExpectedInFailureMode) {
   Expected<int> A = make_error<CustomError>(42);
   EXPECT_DEATH(*A, "Expected<T> must be checked before access or destruction.")
@@ -595,7 +595,7 @@ TEST(Error, AccessExpectedInFailureMode) {
 // Check that an Expected instance with an error triggers an abort if
 // unhandled.
 // Test runs in debug mode only.
-#if LLVM_ENABLE_ABI_BREAKING_CHECKS
+#if !defined(NDEBUG)
 TEST(Error, UnhandledExpectedInFailureMode) {
   EXPECT_DEATH({ Expected<int> A = make_error<CustomError>(42); },
                "Expected<T> must be checked before access or destruction.")
