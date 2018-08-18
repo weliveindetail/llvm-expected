@@ -19,7 +19,6 @@
 #include "llvm/Support/Compiler.h"
 #include "llvm/Support/Debug.h"
 #include "llvm/Support/ErrorHandling.h"
-#include "llvm/Support/Format.h"
 #include "llvm/Support/raw_ostream.h"
 #include <algorithm>
 #include <cassert>
@@ -1180,10 +1179,9 @@ private:
 template <typename... Ts>
 Error createStringError(std::error_code EC, char const *Fmt,
                         const Ts &... Vals) {
-  std::string Buffer;
-  raw_string_ostream Stream(Buffer);
-  Stream << format(Fmt, Vals...);
-  return make_error<StringError>(Stream.str(), EC);
+  char Buffer[2048];
+  ::snprintf(Buffer, sizeof(Buffer), Fmt, Vals...);
+  return make_error<StringError>(Buffer, EC);
 }
 
 inline Error createStringError(std::error_code EC, char const *Msg) {
