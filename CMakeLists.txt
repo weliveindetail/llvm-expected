@@ -64,22 +64,22 @@ set_target_properties(llvm-expected-test PROPERTIES
 message("")
 message("llvm-expected-test")
 
-get_target_property(Prop TestLLVMExpected INCLUDE_DIRECTORIES)
+get_target_property(Prop llvm-expected-test INCLUDE_DIRECTORIES)
 if (NOT Prop STREQUAL "Prop-NOTFOUND")
     message(STATUS "Include directories: ${Prop}")
 endif()
 
-get_target_property(Prop TestLLVMExpected LINK_LIBRARIES)
+get_target_property(Prop llvm-expected-test LINK_LIBRARIES)
 if (NOT Prop STREQUAL "Prop-NOTFOUND")
     message(STATUS "Link libraries: ${Prop}")
 endif()
 
-get_target_property(Prop TestLLVMExpected COMPILE_OPTIONS)
+get_target_property(Prop llvm-expected-test COMPILE_OPTIONS)
 if (NOT Prop STREQUAL "Prop-NOTFOUND")
     message(STATUS "Compile options: ${Prop}")
 endif()
 
-get_target_property(Prop TestLLVMExpected COMPILE_DEFINITIONS)
+get_target_property(Prop llvm-expected-test COMPILE_DEFINITIONS)
 if (NOT Prop STREQUAL "Prop-NOTFOUND")
     message(STATUS "Compile definitions: ${Prop}")
 endif()
