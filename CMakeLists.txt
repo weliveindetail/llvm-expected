@@ -16,7 +16,7 @@ endif()
 
 # use static runtime libraries for MSVC builds
 if(MSVC)
-  set(variables 
+  set(variables
     CMAKE_CXX_FLAGS_DEBUG
     CMAKE_CXX_FLAGS_RELEASE
   )
@@ -36,53 +36,60 @@ message(STATUS "Default C++ flags: ${CMAKE_CXX_FLAGS}")
 message(STATUS "Default C++ flags Debug: ${CMAKE_CXX_FLAGS_DEBUG}")
 message(STATUS "Default C++ flags Release: ${CMAKE_CXX_FLAGS_RELEASE}")
 
-set(BUILD_GTEST ON CACHE BOOL "Include googletest" FORCE)
-set(BUILD_GMOCK OFF CACHE BOOL "Don't include googlemock" FORCE)
+if(NOT IS_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/googletest")
+  message(WARNING "No targets to configure, llvm-expected is header-only. "
+                  "In order to build the unit tests, go to your source "
+                  "directory and checkout the googletest submodule: "
+                  "git submodule update --init --recursive")
+else()
+  set(BUILD_GTEST ON CACHE BOOL "Include googletest" FORCE)
+  set(BUILD_GMOCK OFF CACHE BOOL "Don't include googlemock" FORCE)
 
-cmake_policy(PUSH)
-add_subdirectory(googletest)
-cmake_policy(POP)
+  cmake_policy(PUSH)
+  add_subdirectory(googletest)
+  cmake_policy(POP)
 
-enable_testing()
+  enable_testing()
 
-add_executable(llvm-expected-test
-  llvm-expected-test.cpp)
+  add_executable(llvm-expected-test
+    llvm-expected-test.cpp)
 
-target_link_libraries(llvm-expected-test PRIVATE 
-  gtest gtest_main)
+  target_link_libraries(llvm-expected-test PRIVATE
+    gtest gtest_main)
 
-target_include_directories(llvm-expected-test PRIVATE
-  ${CMAKE_CURRENT_SOURCE_DIR})
+  target_include_directories(llvm-expected-test PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR})
 
-target_compile_options(llvm-expected-test PRIVATE
-  ${DISABLE_RTTI_FLAG}
-  ${DISABLE_EXCEPTIONS_FLAG})
+  target_compile_options(llvm-expected-test PRIVATE
+    ${DISABLE_RTTI_FLAG}
+    ${DISABLE_EXCEPTIONS_FLAG})
 
-set_target_properties(llvm-expected-test PROPERTIES
-  CXX_STANDARD 17)
+  set_target_properties(llvm-expected-test PROPERTIES
+    CXX_STANDARD 17)
 
-message("")
-message("llvm-expected-test")
+  message("")
+  message("llvm-expected-test")
 
-get_target_property(Prop llvm-expected-test INCLUDE_DIRECTORIES)
-if (NOT Prop STREQUAL "Prop-NOTFOUND")
-    message(STATUS "Include directories: ${Prop}")
+  get_target_property(Prop llvm-expected-test INCLUDE_DIRECTORIES)
+  if (NOT Prop STREQUAL "Prop-NOTFOUND")
+      message(STATUS "Include directories: ${Prop}")
+  endif()
+
+  get_target_property(Prop llvm-expected-test LINK_LIBRARIES)
+  if (NOT Prop STREQUAL "Prop-NOTFOUND")
+      message(STATUS "Link libraries: ${Prop}")
+  endif()
+
+  get_target_property(Prop llvm-expected-test COMPILE_OPTIONS)
+  if (NOT Prop STREQUAL "Prop-NOTFOUND")
+      message(STATUS "Compile options: ${Prop}")
+  endif()
+
+  get_target_property(Prop llvm-expected-test COMPILE_DEFINITIONS)
+  if (NOT Prop STREQUAL "Prop-NOTFOUND")
+      message(STATUS "Compile definitions: ${Prop}")
+  endif()
+
+  message("")
+  message("global")
 endif()
-
-get_target_property(Prop llvm-expected-test LINK_LIBRARIES)
-if (NOT Prop STREQUAL "Prop-NOTFOUND")
-    message(STATUS "Link libraries: ${Prop}")
-endif()
-
-get_target_property(Prop llvm-expected-test COMPILE_OPTIONS)
-if (NOT Prop STREQUAL "Prop-NOTFOUND")
-    message(STATUS "Compile options: ${Prop}")
-endif()
-
-get_target_property(Prop llvm-expected-test COMPILE_DEFINITIONS)
-if (NOT Prop STREQUAL "Prop-NOTFOUND")
-    message(STATUS "Compile definitions: ${Prop}")
-endif()
-
-message("")
-message("global")
