@@ -247,7 +247,7 @@ struct AlignedCharArrayUnion : llvm::AlignedCharArray<
     sizeof(::llvm::detail::SizerImpl<T1, T2, T3, T4, T5,
                                      T6, T7, T8, T9, T10>)> {
 };
-  
+
 /// This function calls abort(), and prints the optional message to stderr.
 /// Use the llvm_unreachable macro (that adds location info), instead of
 /// calling this function directly.
@@ -1440,6 +1440,14 @@ inline Error createStringError(std::error_code EC, char const *Msg) {
   return make_error<StringError>(Msg, EC);
 }
 
+inline Error createStringError(std::string Msg) {
+  return make_error<StringError>(std::move(Msg), inconvertibleErrorCode());
+}
+
+inline Error createStringError(char const *Msg) {
+  return make_error<StringError>(Msg, inconvertibleErrorCode());
+}
+
 /// Helper for check-and-exit error handling.
 ///
 /// For tool use only. NOT FOR USE IN LIBRARY CODE.
@@ -1488,7 +1496,7 @@ private:
   std::string Banner;
   std::function<int(const Error &)> GetExitCode;
 };
-  
+
 } // end namespace llvm
 
 #endif // LLVM_SUPPORT_ERROR_H
