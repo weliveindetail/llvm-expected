@@ -251,7 +251,7 @@ struct AlignedCharArrayUnion : llvm::AlignedCharArray<
 /// This function calls abort(), and prints the optional message to stderr.
 /// Use the llvm_unreachable macro (that adds location info), instead of
 /// calling this function directly.
-LLVM_ATTRIBUTE_NORETURN void
+LLVM_ATTRIBUTE_NORETURN inline void
 llvm_unreachable_internal(const char *msg, const char *file, unsigned line) {
   // This code intentionally doesn't call the ErrorHandler callback, because
   // llvm_unreachable is intended to be used to indicate "impossible"
