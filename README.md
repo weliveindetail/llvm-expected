@@ -97,7 +97,7 @@ Great up-to-date documentation in the LLVM Programmer's Manual:<br>
 https://llvm.org/docs/ProgrammersManual.html#recoverable-errors
 
 Some time ago I wrote a blog post with a motivation:<br>
-https://weliveindetail.github.io/blog/post/2017/09/06/llvm-expected-basics.html
+https://weliveindetail.github.io/blog/post/2017/10/22/llvm-expected.html
 
 ## Build Tests
 
